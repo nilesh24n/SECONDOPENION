@@ -12,7 +12,7 @@ const MANDATORY_DISCLAIMER = {
   hi: 'यह कोई चिकित्सीय निदान नहीं है। कृपया अपने डॉक्टर से इस पर चर्चा करें।'
 };
 
-// SAMPLE VENTILATOR & BLOOD TEST DEMO REPORT
+// SAMPLE DEMO REPORT
 const DEMO_REPORT = {
   id: 'rep_demo_cbc_123',
   user_id: 'demo_patient_123',
@@ -118,24 +118,36 @@ const StorageManager = {
   }
 };
 
-// SPEECH RECOGNITION (STT) & SPEECH SYNTHESIS (TTS)
+// ROBUST VOICE ENGINE (STT & TTS FOR MOBILE & DESKTOP)
 const VoiceEngine = {
   synth: typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null,
-  recognition: null,
+  activeRecognition: null,
+  isListening: false,
 
-  initRecognition(language = 'en', onResult, onError, onEnd) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      if (onError) onError('Speech Recognition is not supported in this browser. Try Google Chrome or Safari.');
+  isSTTSupported() {
+    return typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+  },
+
+  isTTSSupported() {
+    return !!this.synth;
+  },
+
+  // Start fresh SpeechRecognition instance on tap
+  startListening(language = 'en', onResult, onError, onEnd) {
+    if (!this.isSTTSupported()) {
+      if (onError) onError('Voice microphone input is not supported on this browser. Try Chrome or Safari.');
       return false;
     }
 
-    this.recognition = new SpeechRecognition();
-    this.recognition.continuous = false;
-    this.recognition.interimResults = true;
-    this.recognition.lang = language === 'hi' ? 'hi-IN' : 'en-US';
+    this.stopListening();
 
-    this.recognition.onresult = (event) => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = language === 'hi' ? 'hi-IN' : 'en-US';
+
+    recognition.onresult = (event) => {
       let transcript = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         transcript += event.results[i][0].transcript;
@@ -143,44 +155,55 @@ const VoiceEngine = {
       if (onResult) onResult(transcript);
     };
 
-    this.recognition.onerror = (event) => {
-      if (onError) onError(event.error || 'Voice input error.');
+    recognition.onerror = (event) => {
+      console.warn('Speech recognition error:', event.error);
+      this.isListening = false;
+      if (onError) onError(event.error === 'not-allowed' ? 'Microphone permission denied.' : 'Voice recognition error.');
     };
 
-    this.recognition.onend = () => {
+    recognition.onend = () => {
+      this.isListening = false;
       if (onEnd) onEnd();
     };
 
-    return true;
-  },
-
-  startListening() {
-    if (this.recognition) {
-      try {
-        this.recognition.start();
-      } catch (e) {
-        console.warn('Speech recognition already started or failed:', e);
-      }
+    try {
+      recognition.start();
+      this.activeRecognition = recognition;
+      this.isListening = true;
+      return true;
+    } catch (err) {
+      console.error('Failed to start speech recognition:', err);
+      this.isListening = false;
+      if (onError) onError('Could not access microphone.');
+      return false;
     }
   },
 
   stopListening() {
-    if (this.recognition) {
+    if (this.activeRecognition) {
       try {
-        this.recognition.stop();
+        this.activeRecognition.stop();
       } catch (e) {
-        console.warn('Speech recognition stop error:', e);
+        console.warn('Stop recognition error:', e);
       }
+      this.activeRecognition = null;
     }
+    this.isListening = false;
   },
 
   speak(text, language = 'en', onEnd) {
     if (!this.synth) return;
     this.synth.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Clean markdown/emojis for smooth speech synthesis
+    const cleanText = text
+      .replace(/[#*`_~]/g, '')
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = language === 'hi' ? 'hi-IN' : 'en-US';
     utterance.rate = 0.95;
+    utterance.pitch = 1.0;
 
     if (onEnd) {
       utterance.onend = onEnd;

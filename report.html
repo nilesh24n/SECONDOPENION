@@ -103,10 +103,10 @@
               </div>
               <div>
                 <h3 class="font-serif text-lg font-semibold" id="chat-box-header">Follow-up Report Assistant</h3>
-                <p class="text-xs" style="opacity: 0.7;">Type or use voice mic to ask questions</p>
+                <p class="text-xs" style="opacity: 0.7;">Type or tap 🎙️ mic to speak your question</p>
               </div>
             </div>
-            <button id="global-stop-audio" onclick="VoiceEngine.stopSpeaking()" class="badge badge-sage" style="display: none; background: var(--marigold); color: var(--teal-deep);">
+            <button id="global-stop-audio" onclick="stopAllAudio()" class="badge badge-sage" style="display: none; background: var(--marigold); color: var(--teal-deep); cursor: pointer;">
               <span>Stop Audio</span>
             </button>
           </div>
@@ -117,13 +117,13 @@
 
           <!-- MIC STATUS BAR -->
           <div id="mic-status-bar" style="display: none; background: var(--red-bg); border-top: 1px solid var(--red-border); padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--red-text);" class="flex items-center justify-between">
-            <span>🎙️ Listening... Speak your question clearly into mic</span>
-            <button onclick="stopMicListening()" style="font-weight: 700; text-transform: uppercase;">Done</button>
+            <span id="mic-status-text">🎙️ Listening... Speak your question into microphone</span>
+            <button onclick="stopMicListening()" style="font-weight: 700; text-transform: uppercase;">Done Speaking</button>
           </div>
 
           <!-- CHAT INPUT FORM -->
           <form onsubmit="handleSendChat(event)" class="chat-input-bar">
-            <button type="button" id="mic-btn" onclick="toggleMic()" class="btn btn-sage" style="padding: 0.75rem;" title="Click to speak using microphone">
+            <button type="button" id="mic-btn" onclick="toggleMic()" class="btn btn-sage" style="padding: 0.75rem;" title="Tap to speak question using microphone">
               <span id="mic-icon">🎙️</span>
             </button>
 
@@ -143,7 +143,7 @@
   <script>
     let currentReport = null;
     let isSpeakingSummary = false;
-    let isMicListening = false;
+    let activeMsgAudioId = null;
 
     document.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
@@ -162,7 +162,6 @@
 
       renderReportPage();
       renderChatMessages();
-      setupVoiceInput();
     });
 
     function renderReportPage() {
@@ -250,17 +249,46 @@
 
     function toggleSummaryAudio() {
       if (isSpeakingSummary) {
-        VoiceEngine.stopSpeaking();
-        isSpeakingSummary = false;
-        document.getElementById('tts-label').innerText = currentReport.language === 'hi' ? 'सारांश बोलकर सुनें' : 'Listen to Summary';
+        stopAllAudio();
       } else {
+        stopAllAudio();
         isSpeakingSummary = true;
         document.getElementById('tts-label').innerText = 'Stop Audio';
+        document.getElementById('global-stop-audio').style.display = 'inline-flex';
         VoiceEngine.speak(currentReport.summary_explanation, currentReport.language, () => {
           isSpeakingSummary = false;
           document.getElementById('tts-label').innerText = currentReport.language === 'hi' ? 'सारांश बोलकर सुनें' : 'Listen to Summary';
+          document.getElementById('global-stop-audio').style.display = 'none';
         });
       }
+    }
+
+    function stopAllAudio() {
+      VoiceEngine.stopSpeaking();
+      isSpeakingSummary = false;
+      activeMsgAudioId = null;
+      document.getElementById('tts-label').innerText = currentReport.language === 'hi' ? 'सारांश बोलकर सुनें' : 'Listen to Summary';
+      document.getElementById('global-stop-audio').style.display = 'none';
+    }
+
+    function playMessageAudio(msgId) {
+      const messages = StorageManager.getChatMessages(currentReport.id);
+      const msg = messages.find(m => m.id === msgId);
+      if (!msg) return;
+
+      if (activeMsgAudioId === msgId) {
+        stopAllAudio();
+        return;
+      }
+
+      stopAllAudio();
+      activeMsgAudioId = msgId;
+      document.getElementById('global-stop-audio').style.display = 'inline-flex';
+
+      VoiceEngine.speak(msg.content, currentReport.language, () => {
+        activeMsgAudioId = null;
+        document.getElementById('global-stop-audio').style.display = 'none';
+      });
     }
 
     function renderChatMessages() {
@@ -284,16 +312,26 @@
 
       list.innerHTML = messages.map(m => `
         <div class="chat-bubble ${m.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}">
-          <div>${m.content}</div>
+          <div>${escapeHtml(m.content)}</div>
           ${m.role === 'assistant' ? `
-            <button onclick="VoiceEngine.speak('${m.content.replace(/'/g, "\\'")}', '${currentReport.language}')" class="text-xs" style="margin-top: 0.5rem; opacity: 0.8; font-weight: 600;">
-              🔊 Listen
+            <button onclick="playMessageAudio('${m.id}')" class="text-xs" style="margin-top: 0.5rem; opacity: 0.85; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
+              🔊 <span>Listen</span>
             </button>
           ` : ''}
         </div>
       `).join('');
 
       list.scrollTop = list.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/\n/g, '<br/>');
     }
 
     function handleSendChat(e) {
@@ -330,7 +368,7 @@
         };
         StorageManager.saveChatMessage(assistantMsg);
         renderChatMessages();
-        VoiceEngine.speak(answer, currentReport.language);
+        playMessageAudio(assistantMsg.id);
       }, 600);
     }
 
@@ -339,38 +377,35 @@
       handleSendChat();
     }
 
-    function setupVoiceInput() {
-      VoiceEngine.initRecognition(
-        currentReport.language,
-        (transcript) => {
-          document.getElementById('chat-input').value = transcript;
-        },
-        (err) => {
-          console.warn('STT Error:', err);
-          stopMicListening();
-        },
-        () => {
-          stopMicListening();
-        }
-      );
-    }
-
     function toggleMic() {
-      if (isMicListening) {
+      if (VoiceEngine.isListening) {
         stopMicListening();
       } else {
-        isMicListening = true;
-        document.getElementById('mic-status-bar').style.display = 'flex';
-        document.getElementById('mic-icon').innerText = '🔴';
-        VoiceEngine.startListening();
+        const started = VoiceEngine.startListening(
+          currentReport.language,
+          (transcript) => {
+            document.getElementById('chat-input').value = transcript;
+          },
+          (err) => {
+            document.getElementById('mic-status-text').innerText = '⚠️ ' + err;
+          },
+          () => {
+            stopMicListening();
+          }
+        );
+
+        if (started) {
+          document.getElementById('mic-status-bar').style.display = 'flex';
+          document.getElementById('mic-status-text').innerText = '🎙️ Listening... Speak your question into microphone';
+          document.getElementById('mic-icon').innerText = '🔴';
+        }
       }
     }
 
     function stopMicListening() {
-      isMicListening = false;
+      VoiceEngine.stopListening();
       document.getElementById('mic-status-bar').style.display = 'none';
       document.getElementById('mic-icon').innerText = '🎙️';
-      VoiceEngine.stopListening();
     }
 
     function handleDeleteReport() {
