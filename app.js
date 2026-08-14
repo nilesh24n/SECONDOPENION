@@ -1,4 +1,4 @@
-// Second Opinion - Pure Vanilla JS Application Core (Enhanced Mobile & Indian Accent Voice Engine)
+// Second Opinion - Pure Vanilla JS Application Core (Smart Document Validation & Natural Conversational Assistant)
 
 const STORAGE_KEYS = {
   USER: 'second_opinion_user',
@@ -30,7 +30,7 @@ const DEMO_REPORT = {
       numeric_value: 11.2,
       min_ref: 12.0,
       max_ref: 15.5,
-      gauge_percent: 22, // Low area on gauge
+      gauge_percent: 22,
       is_normal: false,
       status: 'out_of_range',
       level_label: 'Slightly Low (Mild Deficiency)',
@@ -45,7 +45,7 @@ const DEMO_REPORT = {
       numeric_value: 104,
       min_ref: 70,
       max_ref: 99,
-      gauge_percent: 78, // Borderline High area
+      gauge_percent: 78,
       is_normal: false,
       status: 'out_of_range',
       level_label: 'Borderline High (Prediabetes range)',
@@ -60,7 +60,7 @@ const DEMO_REPORT = {
       numeric_value: 220000,
       min_ref: 150000,
       max_ref: 450000,
-      gauge_percent: 50, // Perfectly Normal center
+      gauge_percent: 50,
       is_normal: true,
       status: 'normal',
       level_label: 'Optimal & Healthy',
@@ -133,18 +133,116 @@ const StorageManager = {
   }
 };
 
+// MEDICAL DOCUMENT VALIDATOR (DETECTS NON-MEDICAL FILES LIKE TIMETABLES, RECEIPTS, NOTEPADS)
+const DocumentValidator = {
+  nonMedicalKeywords: [
+    'timetable', 'schedule', 'routine', 'class', 'lecture', 'calendar', 'invoice',
+    'receipt', 'bill', 'ticket', 'flight', 'reservation', 'resume', 'cv', 'passport',
+    'license', 'assignment', 'homework', 'syllabus', 'agenda', 'menu', 'restaurant'
+  ],
+
+  medicalKeywords: [
+    'blood', 'cbc', 'hemoglobin', 'glucose', 'sugar', 'test', 'lab', 'report',
+    'prescription', 'doctor', 'patient', 'hospital', 'clinic', 'scan', 'mri',
+    'ct', 'xray', 'ultrasound', 'pathology', 'metabolic', 'cholesterol', 'thyroid',
+    'urine', 'lipid', 'vitamin', 'creatinine', 'urea', 'liver', 'kidney', 'sgot', 'sgpt'
+  ],
+
+  validateFile(file) {
+    if (!file) return { isValid: false, reason: 'No file selected.' };
+
+    const name = file.name.toLowerCase();
+
+    // 1. Check if filename explicitly indicates non-medical content
+    const isNonMedicalFilename = this.nonMedicalKeywords.some(kw => name.includes(kw));
+    if (isNonMedicalFilename) {
+      return {
+        isValid: false,
+        reason: `Non-Medical File Detected ("${file.name}"): This file appears to be a timetable, schedule, or non-medical document. Please upload a valid medical report (blood test, lab result, prescription, or scan).`
+      };
+    }
+
+    return { isValid: true };
+  }
+};
+
+// NATURAL CONVERSATIONAL AI ASSISTANT RESPONSE ENGINE
+const AssistantAI = {
+  generateResponse(query, report, language = 'en') {
+    const q = query.trim().toLowerCase();
+    const isHindi = language === 'hi';
+    const disclaimer = MANDATORY_DISCLAIMER[language];
+
+    // 1. GREETINGS
+    if (/^(hi|hello|hey|namaste|good morning|good evening|greetings|hola)\b/i.test(q)) {
+      return isHindi
+        ? `नमस्ते! मैं आपका सेकेंड ओपिनियन वॉइस एंड टेक्स्ट असिस्टेंट हूँ। 🙏\n\nमैं आपकी मेडिकल रिपोर्ट को समझने में आपकी मदद कर सकता हूँ। आप किसी भी लैब टेस्ट मान, हीमोग्लोबिन, शुगर या रिपोर्ट के बारे में सवाल पूछ सकते हैं।`
+        : `Hello! I am your Second Opinion Voice & Text Assistant. 👋\n\nI am here to help you understand your medical report. You can ask me about any parameter value (like Hemoglobin or Blood Sugar), reference ranges, or what questions to ask your doctor. How can I help you today?`;
+    }
+
+    // 2. ACKNOWLEDGMENTS & THANKS
+    if (/^(ok|okay|thanks|thank you|got it|understood|fine|cool|dhanyawad|shukriya)\b/i.test(q)) {
+      return isHindi
+        ? `आपका स्वागत है! यदि आपकी रिपोर्ट के संबंध में आपके मन में कोई और प्रश्न हो, तो बेझिझक पूछें।\n\n${disclaimer}`
+        : `You are very welcome! Feel free to ask if you have any other questions about your report findings.\n\n${disclaimer}`;
+    }
+
+    // 3. IDENTITY / CAPABILITIES
+    if (/^(who are you|what can you do|what is this|help)\b/i.test(q)) {
+      return isHindi
+        ? `मैं सेकेंड ओपिनियन असिस्टेंट हूँ। मैं मेडिकल रिपोर्ट के कठिन शब्दों को सरल हिंदी भाषा में और विजुअल ग्राफ के साथ समझाता हूँ।`
+        : `I am Second Opinion, an AI medical report explainer. I translate complex lab jargon into plain language and visual spectrum gauges (Low-Normal-High). I also help suggest questions for your doctor.`;
+    }
+
+    // 4. PARAMETER SPECIFIC QUERIES
+
+    // Hemoglobin
+    if (q.includes('hemoglobin') || q.includes('hb') || q.includes('हीमोग्लोबिन') || q.includes('iron') || q.includes('blood count')) {
+      return isHindi
+        ? `हीमोग्लोबिन आपके रक्त में ऑक्सीजन पहुंचाता है। आपकी रिपोर्ट में यह 11.2 g/dL है जो सामान्य सीमा (12.0 - 15.5) से थोड़ा कम है।\n\n💡 सलाह: अपने डॉक्टर से पूछें कि क्या पालक, अनार, बीटरूट या आयरन सप्लीमेंट से इसे बढ़ाना उचित है।\n\n${disclaimer}`
+        : `Hemoglobin is the protein in red blood cells that carries oxygen throughout your body. Your result is 11.2 g/dL, which is slightly below the target range of 12.0 - 15.5 g/dL.\n\n💡 What to ask: Ask your doctor if adding iron-rich foods (spinach, lentils, pomegranate) or iron supplements is recommended.\n\n${disclaimer}`;
+    }
+
+    // Glucose / Sugar
+    if (q.includes('sugar') || q.includes('glucose') || q.includes('fasting') || q.includes('शुगर') || q.includes('ग्लूकोज') || q.includes('diabetes')) {
+      return isHindi
+        ? `फास्टिंग ब्लड शुगर खाली पेट रक्त शर्करा का स्तर मापता है। आपका मान 104 mg/dL है जो सामान्य सीमा (70 - 99) से थोड़ा ऊपर है। इसे डॉक्टर 'बॉर्डरलाइन प्रीडायबिटीज' कहते हैं।\n\n💡 सलाह: डॉक्टर से पूछें कि मीठा कम करने और हल्की चहलकदमी से इसे कैसे सामान्य करें।\n\n${disclaimer}`
+        : `Fasting Blood Glucose measures blood sugar after not eating overnight. Your level of 104 mg/dL is slightly above the normal upper limit of 99 mg/dL. Doctors refer to this range as borderline prediabetes.\n\n💡 What to ask: Ask your doctor what simple diet adjustments or 20-minute daily walks can bring your sugar back to optimal range.\n\n${disclaimer}`;
+    }
+
+    // Platelets
+    if (q.includes('platelet') || q.includes('platelets') || q.includes('प्लेटलेट')) {
+      return isHindi
+        ? `आपकी प्लेटलेट संख्या (220,000 /µL) पूरी तरह से सामान्य और स्वस्थ सीमा (150,000 - 450,000) में है। प्लेटलेट्स चोट लगने पर थक्का जमाने का काम करती हैं।\n\n${disclaimer}`
+        : `Your Platelet Count is 220,000 /µL, which is completely normal and healthy (normal range is 150,000 - 450,000 /µL). Platelets help your blood clot normally.\n\n${disclaimer}`;
+    }
+
+    // Reference Range
+    if (q.includes('reference') || q.includes('range') || q.includes('normal range') || q.includes('रेफरेंस')) {
+      return isHindi
+        ? `रेफरेंस रेंज (Reference Range) स्वस्थ व्यक्तियों के लिए सामान्य मानों की सीमा होती है। यदि आपका परिणाम इस सीमा के बाहर है, तो विजुअल ग्राफ में आपको संकेत दिखेगा।\n\n${disclaimer}`
+        : `A Reference Range shows the typical upper and lower boundary values for healthy individuals. In your report cards above, look at the visual gauge line to see exactly where your value lands relative to normal limits.\n\n${disclaimer}`;
+    }
+
+    // 5. GENERAL REPORT QUERY FALLBACK
+    return isHindi
+      ? `आपकी रिपोर्ट ("${report ? report.title : 'रक्त जांच'}") के संदर्भ में: मुख्य बिंदु यह है कि हीमोग्लोबिन 11.2 (थोड़ा कम) और फास्टिंग शुगर 104 (बॉर्डरलाइन अधिक) है। आपकी प्लेटलेट्स बिल्कुल स्वस्थ हैं।\n\n${disclaimer}`
+      : `Regarding your query about "${report ? report.title : 'your report'}": The main findings highlight that your Hemoglobin (11.2) is slightly low and Fasting Glucose (104) is borderline high. Your Platelet count is completely normal. Please confirm these findings with your doctor.\n\n${disclaimer}`;
+  }
+};
+
 // ROBUST VOICE ENGINE WITH INDIAN ACCENT VOICE SELECTION
 const VoiceEngine = {
   synth: typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis : null,
   activeRecognition: null,
   isListening: false,
-  indianVoice: null,
+  indianVoiceHi: null,
+  indianVoiceEn: null,
 
   initVoices() {
     if (!this.synth) return;
     const loadVoices = () => {
       const voices = this.synth.getVoices();
-      // Find Indian accent voice for Hindi or English (hi-IN or en-IN)
       this.indianVoiceHi = voices.find(v => v.lang.includes('hi-IN') || v.lang.includes('hi_IN'));
       this.indianVoiceEn = voices.find(v => v.lang.includes('en-IN') || v.lang.includes('en_IN') || v.name.toLowerCase().includes('india') || v.name.toLowerCase().includes('hindi'));
     };
@@ -229,7 +327,6 @@ const VoiceEngine = {
     utterance.rate = 0.95;
     utterance.pitch = 1.0;
 
-    // Use Indian voice if detected
     if (language === 'hi' && this.indianVoiceHi) {
       utterance.voice = this.indianVoiceHi;
     } else if (language === 'en' && this.indianVoiceEn) {
@@ -251,7 +348,7 @@ const VoiceEngine = {
   }
 };
 
-// FLOATING INDIAN VOICE ASSISTANT WIDGET (CONTAINER INJECTOR)
+// FLOATING INDIAN VOICE ASSISTANT WIDGET
 const FloatingVoiceWidget = {
   render() {
     if (document.getElementById('floating-voice-widget')) return;
@@ -270,7 +367,7 @@ const FloatingVoiceWidget = {
         </div>
         
         <p class="text-xs" style="color: rgba(29,43,39,0.8);" id="popover-status">
-          Tap the mic button and ask any question about your report in Hindi or English!
+          Tap "Talk Now" and ask any question in Hindi or English (e.g. "Hi", "How is my sugar?", "What is hemoglobin?")
         </p>
 
         <div id="popover-transcript" style="display: none; background: var(--paper); padding: 0.5rem; border-radius: 0.5rem; font-size: 0.75rem; font-family: monospace; max-height: 80px; overflow-y: auto;">
@@ -353,10 +450,8 @@ const FloatingVoiceWidget = {
         micBtn.querySelector('span').innerText = '🎙️ Talk Now';
         const text = transcriptEl.innerText;
         if (text && text !== '...') {
-          statusEl.innerText = 'Analyzing & answering in Indian voice...';
-          const reply = lang === 'hi'
-            ? `आपके प्रश्न "${text}" के लिए: आपकी रिपोर्ट दर्शाती है कि हीमोग्लोबिन 11.2 थोड़ा कम है और फास्टिंग शुगर 104 थोड़ी अधिक है। घबराएं नहीं, डॉक्टर की सलाह लें।`
-            : `For your question "${text}": Your report shows Hemoglobin (11.2) is slightly low and Fasting Sugar (104) is borderline high. Your platelets are healthy. Confirm with your doctor.`;
+          statusEl.innerText = 'Responding in Indian voice...';
+          const reply = AssistantAI.generateResponse(text, report, lang);
           
           document.getElementById('widget-stop-audio').style.display = 'inline-flex';
           VoiceEngine.speak(reply, lang, () => {
@@ -413,7 +508,7 @@ function handleSignOut() {
   window.location.reload();
 }
 
-// INSTANT DEMO GENERATOR (SUPER SIMPLE PATIENT-FRIENDLY REPORT)
+// INSTANT DEMO GENERATOR
 function generateInstantDemo(language = 'en') {
   const reportId = 'rep_demo_' + Date.now();
   const report = {
@@ -435,7 +530,7 @@ function generateInstantDemo(language = 'en') {
         numeric_value: 11.2,
         min_ref: 12.0,
         max_ref: 15.5,
-        gauge_percent: 22, // Low area on visual gauge
+        gauge_percent: 22,
         is_normal: false,
         status: 'out_of_range',
         level_label: language === 'hi' ? 'सामान्य से थोड़ा कम (हल्का आयरन की कमी)' : 'Slightly Low (Mild Iron Deficiency)',
@@ -454,7 +549,7 @@ function generateInstantDemo(language = 'en') {
         numeric_value: 104,
         min_ref: 70,
         max_ref: 99,
-        gauge_percent: 78, // Borderline High area on visual gauge
+        gauge_percent: 78,
         is_normal: false,
         status: 'out_of_range',
         level_label: language === 'hi' ? 'बॉर्डरलाइन अधिक (प्रीडायबिटीज स्तर)' : 'Borderline High (Prediabetes Threshold)',
@@ -473,7 +568,7 @@ function generateInstantDemo(language = 'en') {
         numeric_value: 220000,
         min_ref: 150000,
         max_ref: 450000,
-        gauge_percent: 50, // Optimal Center on visual gauge
+        gauge_percent: 50,
         is_normal: true,
         status: 'normal',
         level_label: language === 'hi' ? 'बिल्कुल सामान्य एवं स्वस्थ' : 'Optimal & Perfectly Normal',

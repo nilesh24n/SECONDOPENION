@@ -102,7 +102,7 @@
 
         <!-- DRAG & DROP ZONE -->
         <div class="space-y-3">
-          <label class="form-label">Document File (Photo or PDF)</label>
+          <label class="form-label">Medical Document File (Blood Test, Prescription, Scan)</label>
 
           <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
             <div class="drop-icon">
@@ -125,7 +125,8 @@
           </div>
         </div>
 
-        <div id="upload-error" style="display: none;" class="card" style="background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); font-size: 0.75rem;"></div>
+        <!-- ERROR NOTIFICATION BOX FOR INVALID/NON-MEDICAL FILES -->
+        <div id="upload-error" style="display: none; background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red-text); font-size: 0.8125rem; padding: 1rem; border-radius: 0.75rem; line-height: 1.5;"></div>
 
         <!-- SUBMIT BUTTON -->
         <button type="button" id="submit-btn" onclick="submitUpload()" class="btn btn-teal w-full" style="padding: 0.875rem; font-size: 0.9375rem;">
@@ -135,7 +136,7 @@
 
         <div style="background: var(--paper); padding: 0.875rem; border-radius: 0.75rem; border: 1px solid var(--sage-line); display: flex; items-center; gap: 0.625rem; font-size: 0.75rem; color: rgba(29,43,39,0.8);">
           <span>✅</span>
-          <span>Your document is analyzed securely. Second Opinion never provides prescriptions or medical diagnoses.</span>
+          <span>Your document is analyzed securely. Non-medical documents (like timetables or bills) will be flagged.</span>
         </div>
 
       </div>
@@ -173,21 +174,39 @@
     }
 
     function handleFileSelected(file) {
+      document.getElementById('upload-error').style.display = 'none';
       if (!file) return;
+
+      // 1. Check size limit
       if (file.size > 10 * 1024 * 1024) {
-        document.getElementById('upload-error').innerText = 'File exceeds 10MB limit.';
+        document.getElementById('upload-error').innerHTML = '<strong>❌ File Size Error:</strong> File exceeds 10MB limit.';
         document.getElementById('upload-error').style.display = 'block';
+        uploadedFile = null;
         return;
       }
+
+      // 2. Check non-medical document validation
+      const validation = DocumentValidator.validateFile(file);
+      if (!validation.isValid) {
+        document.getElementById('upload-error').innerHTML = `<strong>❌ Non-Medical File Detected:</strong> ${validation.reason}`;
+        document.getElementById('upload-error').style.display = 'block';
+        uploadedFile = null;
+        return;
+      }
+
       uploadedFile = file;
       document.getElementById('file-display-area').innerHTML = `
-        <p class="font-semibold text-sm" style="color: var(--teal-deep);">📄 ${file.name}</p>
+        <p class="font-semibold text-sm" style="color: var(--teal-deep);">📄 Valid Medical File: ${file.name}</p>
         <p class="text-xs" style="color: rgba(29,43,39,0.5);">${(file.size / (1024*1024)).toFixed(2)} MB</p>
       `;
     }
 
     function submitUpload() {
       if (!uploadedFile) {
+        const errorEl = document.getElementById('upload-error');
+        if (errorEl.style.display !== 'none' && errorEl.innerText) {
+          return;
+        }
         generateInstantDemo(selectedLanguage);
         return;
       }

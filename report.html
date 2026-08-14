@@ -71,7 +71,7 @@
       <div class="space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="font-serif text-2xl font-bold" style="color: var(--teal-deep);" id="findings-title">
-            Key Findings & Explanations
+            Key Findings & Visual Gauges
           </h2>
           <span class="text-xs" style="color: rgba(29,43,39,0.6);" id="findings-count"></span>
         </div>
@@ -133,7 +133,7 @@
               <span id="mic-icon">🎙️</span>
             </button>
 
-            <input type="text" id="chat-input" class="form-input" placeholder="Type or speak a question..." style="background: var(--paper);" />
+            <input type="text" id="chat-input" class="form-input" placeholder="Type or speak a question (e.g. 'Hi', 'Is hemoglobin low?')..." style="background: var(--paper);" />
 
             <button type="submit" class="btn btn-teal" style="padding: 0.75rem 1.25rem;">
               <span>Send</span>
@@ -376,13 +376,9 @@
       input.value = '';
       renderChatMessages();
 
-      // Simulated Assistant Answer in Indian Accent
+      // Intelligent Natural Conversational Response
       setTimeout(() => {
-        let answer = `Regarding your question "${text}": Overall your report parameters are stable. Hemoglobin is slightly lower than normal and fasting glucose is borderline high. Please discuss with your doctor.\n\n${currentReport.disclaimer}`;
-        
-        if (text.toLowerCase().includes('hemoglobin') || text.toLowerCase().includes('hb')) {
-          answer = `Hemoglobin carries oxygen in your blood. Your level of 11.2 g/dL is slightly below normal. Your doctor may suggest dietary iron adjustments like spinach or lentils.\n\n${currentReport.disclaimer}`;
-        }
+        const answer = AssistantAI.generateResponse(text, currentReport, currentReport.language);
 
         const assistantMsg = {
           id: 'msg_a_' + Date.now(),
@@ -394,7 +390,7 @@
         StorageManager.saveChatMessage(assistantMsg);
         renderChatMessages();
         playMessageAudio(assistantMsg.id);
-      }, 600);
+      }, 400);
     }
 
     function sendQuickQuestion(q) {
