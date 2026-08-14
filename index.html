@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Second Opinion — Plain Language Medical Report Explainer</title>
+  <meta name="description" content="Upload your blood test, prescription, or scan report and get a clear, plain-language explanation in Hindi or English." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="brand-logo">
+        Second<span>Opinion</span>
+      </a>
+      <div class="nav-links">
+        <a href="upload.html" class="nav-link">
+          <span>📤</span>
+          <span>Upload Report</span>
+        </a>
+        <a href="history.html" class="nav-link">
+          <span>📜</span>
+          <span>Report History</span>
+        </a>
+        <div id="nav-user-container"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- HERO SECTION -->
+    <section class="hero-grid">
+      <div>
+        <div class="badge badge-sage mb-4">
+          <span>✨ Your report, explained plainly</span>
+        </div>
+        <h1 class="hero-title">
+          Your test report says a lot. <br />
+          <span style="font-style: italic; font-weight: 400;">Nobody ever explains what it means.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Upload a blood test, prescription, or scan report. Get a clear, plain-language explanation in Hindi or English — what each value means, and what's worth asking your doctor about.
+        </p>
+
+        <div class="hero-actions">
+          <a href="upload.html" class="btn btn-teal">
+            <span>Upload your first report</span>
+            <span>→</span>
+          </a>
+          <a href="auth.html" class="btn btn-outline">
+            <span>Sign In / Register</span>
+          </a>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs" style="color: rgba(29,43,39,0.6); margin-top: 1rem;">
+          <span>🛡️</span>
+          <span>Second Opinion explains reports in plain language. It does not diagnose conditions or replace your doctor.</span>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE DEMO CARD -->
+      <div class="demo-card">
+        <div class="demo-card-tabs">
+          <div class="tab-left">
+            <span>📄</span>
+            <span>Your report says</span>
+          </div>
+          <div class="tab-right">
+            <span>✨</span>
+            <span>In plain words</span>
+          </div>
+        </div>
+
+        <div class="demo-card-body">
+          <div class="demo-lang-toggle">
+            <span style="font-weight: 600; color: var(--teal-deep);">Interactive Example</span>
+            <div class="toggle-group">
+              <button id="toggle-en" class="toggle-btn active" onclick="setDemoLang('en')">English</button>
+              <button id="toggle-hi" class="toggle-btn" onclick="setDemoLang('hi')">हिंदी</button>
+            </div>
+          </div>
+
+          <div style="font-family: monospace; font-size: 0.75rem; background: var(--paper); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--sage-line); display: flex; justify-content: space-between;">
+            <span>HbA1c: 6.1%</span>
+            <span style="color: var(--marigold-deep); font-weight: 700;">Ref: &lt;5.7%</span>
+          </div>
+
+          <div style="text-align: center; color: var(--marigold-deep); font-weight: 700;">↓</div>
+
+          <div id="demo-explanation-box" style="background: var(--sage); padding: 1rem; border-radius: 0.75rem; font-size: 0.875rem; border: 1px solid var(--sage-line); display: flex; flex-direction: column; gap: 0.5rem;">
+            <p style="font-weight: 700; color: var(--teal);">
+              Your average blood sugar over the last 3 months is slightly above normal.
+            </p>
+            <p style="font-size: 0.75rem; color: rgba(29,43,39,0.8);">
+              This isn't diabetes yet, but it's a stage doctors call "prediabetes." Worth discussing with your doctor at your next visit.
+            </p>
+          </div>
+
+          <div id="demo-disclaimer" style="font-size: 0.6875rem; font-style: italic; color: rgba(29,43,39,0.5); text-align: center;">
+            This is an explanation, not a diagnosis. Always confirm with your doctor.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section style="padding: 3rem 0; border-top: 1px solid var(--sage-line);">
+      <div style="margin-bottom: 2rem;">
+        <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--marigold-deep);">How it works</div>
+        <h2 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">Three simple steps to clarity</h2>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="feature-num">01</div>
+          <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">Upload Document</h3>
+          <p class="text-sm" style="color: rgba(29,43,39,0.7);">
+            Snap a photo or upload a PDF of any blood test, lab result, prescription, or scan report.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-num">02</div>
+          <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">AI Document Reader</h3>
+          <p class="text-sm" style="color: rgba(29,43,39,0.7);">
+            Gemini AI analyzes every value, flags out-of-range metrics, and translates jargon into simple English or Hindi.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-num">03</div>
+          <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">Interactive Q&A & Voice</h3>
+          <p class="text-sm" style="color: rgba(29,43,39,0.7);">
+            Ask follow-up questions by typing or speaking. Listen to answers read aloud in your preferred language.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VOICE FEATURE CARD -->
+    <section class="card" style="background: var(--sage); padding: 2.5rem; margin-bottom: 3rem;">
+      <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: center;">
+        <div class="space-y-4">
+          <div class="badge badge-teal-deep">
+            <span>🎙️ Web Speech API Powered</span>
+          </div>
+          <h3 class="font-serif text-2xl font-bold" style="color: var(--teal-deep);">
+            Speak your questions. Listen to explanations out loud.
+          </h3>
+          <p class="text-sm" style="color: rgba(29,43,39,0.8);">
+            Don't want to type? Tap the microphone to ask questions about your report in English or Hindi. You can also press the listen button to hear the explanation read to you in clear speech.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRUST BAND -->
+    <section style="background: var(--teal-deep); color: var(--white); border-radius: var(--radius-xl); padding: 2.5rem; margin-bottom: 3rem;" class="space-y-6">
+      <div>
+        <h2 class="font-serif text-2xl font-bold">Built for peace of mind</h2>
+        <p style="color: rgba(255,255,255,0.8);" class="text-sm mt-2">
+          Medical jargon causes unnecessary anxiety. Second Opinion brings clarity while upholding strict safety boundaries.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+        <div class="flex gap-2 items-center">
+          <span style="color: var(--marigold);">✔</span>
+          <span class="text-sm"><strong>No Prescriptions:</strong> We never suggest medicines or alter treatments.</span>
+        </div>
+        <div class="flex gap-2 items-center">
+          <span style="color: var(--marigold);">✔</span>
+          <span class="text-sm"><strong>Honest Unclear Flags:</strong> Blurry or illegible sections are flagged honestly.</span>
+        </div>
+        <div class="flex gap-2 items-center">
+          <span style="color: var(--marigold);">✔</span>
+          <span class="text-sm"><strong>Doctor First:</strong> Every report ends with a doctor consultation disclaimer.</span>
+        </div>
+        <div class="flex gap-2 items-center">
+          <span style="color: var(--marigold);">✔</span>
+          <span class="text-sm"><strong>Bilingual Support:</strong> Instant toggle between English and Hindi.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="text-center space-y-4" style="padding: 3rem 0; max-width: 32rem; margin: 0 auto;">
+      <h2 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">
+        Ready to understand your report?
+      </h2>
+      <p class="text-sm" style="color: rgba(29,43,39,0.7);">
+        Upload your document now and get a plain language breakdown in seconds.
+      </p>
+      <div>
+        <a href="upload.html" class="btn btn-teal">
+          <span>Upload Document Now</span>
+          <span>→</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p><strong>Second Opinion — Plain Language Medical Report Explainer</strong></p>
+      <p>Second Opinion translates complex lab values into plain English or Hindi. Educational only. Always consult a doctor.</p>
+      <p>© 2026 Second Opinion Health. Safe, Private & Doctor-First.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    function setDemoLang(lang) {
+      document.getElementById('toggle-en').classList.toggle('active', lang === 'en');
+      document.getElementById('toggle-hi').classList.toggle('active', lang === 'hi');
+      const box = document.getElementById('demo-explanation-box');
+      const disclaimer = document.getElementById('demo-disclaimer');
+
+      if (lang === 'hi') {
+        box.innerHTML = `
+          <p style="font-weight: 700; color: var(--teal);">
+            पिछले 3 महीनों में आपका औसत ब्लड शुगर सामान्य सीमा से थोड़ा अधिक है।
+          </p>
+          <p style="font-size: 0.75rem; color: rgba(29,43,39,0.8);">
+            यह अभी मधुमेह (डायबिटीज) नहीं है, लेकिन इसे डॉक्टर "प्रीडायबिटीज" कहते हैं। अगली यात्रा पर अपने डॉक्टर से इस पर चर्चा करना उचित है।
+          </p>
+        `;
+        disclaimer.innerText = 'यह एक व्याख्या है, निदान नहीं। हमेशा अपने डॉक्टर से पुष्टि करें।';
+      } else {
+        box.innerHTML = `
+          <p style="font-weight: 700; color: var(--teal);">
+            Your average blood sugar over the last 3 months is slightly above normal.
+          </p>
+          <p style="font-size: 0.75rem; color: rgba(29,43,39,0.8);">
+            This isn't diabetes yet, but it's a stage doctors call "prediabetes." Worth discussing with your doctor at your next visit.
+          </p>
+        `;
+        disclaimer.innerText = 'This is an explanation, not a diagnosis. Always confirm with your doctor.';
+      }
+    }
+  </script>
+</body>
+</html>

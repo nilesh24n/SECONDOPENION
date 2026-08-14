@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Report — Second Opinion</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="brand-logo">
+        Second<span>Opinion</span>
+      </a>
+      <div class="nav-links">
+        <a href="upload.html" class="nav-link" style="color: var(--teal-deep); font-weight: 700;">
+          <span>📤</span>
+          <span>Upload Report</span>
+        </a>
+        <a href="history.html" class="nav-link">
+          <span>📜</span>
+          <span>Report History</span>
+        </a>
+        <div id="nav-user-container"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="max-w-3xl mx-auto space-y-8">
+      
+      <!-- HEADER -->
+      <div class="text-center space-y-3">
+        <div class="badge badge-sage">
+          <span>✨ Step 1: Upload Document</span>
+        </div>
+        <h1 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">
+          Upload Your Medical Report
+        </h1>
+        <p class="text-sm" style="color: rgba(29,43,39,0.7); max-width: 32rem; margin: 0 auto;">
+          Upload a clear photo or PDF of your blood test, prescription, scan summary, or lab report.
+        </p>
+      </div>
+
+      <!-- INSTANT SAMPLE REPORT BANNER -->
+      <div class="card flex flex-col sm:flex-row items-center justify-between gap-4" style="background: linear-gradient(135deg, var(--teal-deep), var(--teal)); color: var(--white); border: none;">
+        <div class="flex items-center gap-3">
+          <div style="width: 2.5rem; height: 2.5rem; border-radius: 0.75rem; background: var(--marigold); color: var(--teal-deep); display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
+            ⚡
+          </div>
+          <div>
+            <h4 class="font-serif text-base font-semibold">Test Voice & Report Features Instantly</h4>
+            <p class="text-xs" style="color: rgba(255,255,255,0.8);">
+              Don't have a document file right now? Load a sample blood test report in 1-click.
+            </p>
+          </div>
+        </div>
+
+        <button type="button" onclick="generateInstantDemo(selectedLanguage)" class="btn btn-marigold text-xs" style="white-space: nowrap;">
+          <span>Try Sample Report</span>
+          <span>→</span>
+        </button>
+      </div>
+
+      <!-- MAIN UPLOAD CARD -->
+      <div class="card space-y-8" style="padding: 2.5rem;">
+        
+        <!-- LANGUAGE SELECTOR -->
+        <div class="space-y-3">
+          <label class="form-label flex items-center gap-2">
+            <span>🌐</span>
+            <span>Select Explanation Language</span>
+          </label>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <button type="button" id="lang-btn-en" onclick="selectLang('en')" class="btn btn-outline flex items-center justify-center gap-3" style="border-color: var(--teal); background: rgba(22,66,60,0.05); font-weight: 700;">
+              <span style="font-size: 1.25rem;">🇬🇧</span>
+              <div style="text-align: left;">
+                <div style="font-size: 0.875rem;">English</div>
+                <div style="font-size: 0.6875rem; font-weight: 400; opacity: 0.7;">Plain English terms</div>
+              </div>
+            </button>
+
+            <button type="button" id="lang-btn-hi" onclick="selectLang('hi')" class="btn btn-outline flex items-center justify-center gap-3" style="border-color: var(--sage-line);">
+              <span style="font-size: 1.25rem;">🇮🇳</span>
+              <div style="text-align: left;">
+                <div style="font-size: 0.875rem;">हिंदी (Hindi)</div>
+                <div style="font-size: 0.6875rem; font-weight: 400; opacity: 0.7;">सरल हिंदी भाषा</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- DRAG & DROP ZONE -->
+        <div class="space-y-3">
+          <label class="form-label">Document File (Photo or PDF)</label>
+
+          <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <div class="drop-icon">
+              <span style="font-size: 2rem;">📥</span>
+            </div>
+
+            <div class="space-y-1" id="file-display-area">
+              <p class="font-serif text-lg font-semibold" style="color: var(--teal-deep);">
+                Drag and drop your report here
+              </p>
+              <p class="text-xs" style="color: rgba(29,43,39,0.6);">
+                Supports JPG, PNG, WebP photos or PDF documents up to 10MB
+              </p>
+            </div>
+
+            <label class="btn btn-teal text-xs" onclick="event.stopPropagation()">
+              <span>Browse File</span>
+              <input type="file" id="file-input" accept="image/*,application/pdf" style="display: none;" onchange="handleFileSelected(this.files[0])" />
+            </label>
+          </div>
+        </div>
+
+        <div id="upload-error" style="display: none;" class="card" style="background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); font-size: 0.75rem;"></div>
+
+        <!-- SUBMIT BUTTON -->
+        <button type="button" id="submit-btn" onclick="submitUpload()" class="btn btn-teal w-full" style="padding: 1rem; font-size: 1rem;">
+          <span id="submit-text">Explain Report in Plain Language</span>
+          <span>→</span>
+        </button>
+
+        <div style="background: var(--paper); padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--sage-line); display: flex; items-center; gap: 0.75rem; font-size: 0.75rem; color: rgba(29,43,39,0.8);">
+          <span>✅</span>
+          <span>Your document is analyzed securely. Second Opinion never provides prescriptions or medical diagnoses.</span>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    let selectedLanguage = 'en';
+    let uploadedFile = null;
+
+    function selectLang(lang) {
+      selectedLanguage = lang;
+      const btnEn = document.getElementById('lang-btn-en');
+      const btnHi = document.getElementById('lang-btn-hi');
+
+      if (lang === 'en') {
+        btnEn.style.borderColor = 'var(--teal)';
+        btnEn.style.background = 'rgba(22,66,60,0.05)';
+        btnEn.style.fontWeight = '700';
+
+        btnHi.style.borderColor = 'var(--sage-line)';
+        btnHi.style.background = 'transparent';
+        btnHi.style.fontWeight = '400';
+      } else {
+        btnHi.style.borderColor = 'var(--teal)';
+        btnHi.style.background = 'rgba(22,66,60,0.05)';
+        btnHi.style.fontWeight = '700';
+
+        btnEn.style.borderColor = 'var(--sage-line)';
+        btnEn.style.background = 'transparent';
+        btnEn.style.fontWeight = '400';
+      }
+    }
+
+    function handleFileSelected(file) {
+      if (!file) return;
+      if (file.size > 10 * 1024 * 1024) {
+        document.getElementById('upload-error').innerText = 'File exceeds 10MB limit.';
+        document.getElementById('upload-error').style.display = 'block';
+        return;
+      }
+      uploadedFile = file;
+      document.getElementById('file-display-area').innerHTML = `
+        <p class="font-semibold text-sm" style="color: var(--teal-deep);">📄 ${file.name}</p>
+        <p class="text-xs" style="color: rgba(29,43,39,0.5);">${(file.size / (1024*1024)).toFixed(2)} MB</p>
+      `;
+    }
+
+    function submitUpload() {
+      if (!uploadedFile) {
+        generateInstantDemo(selectedLanguage);
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      const text = document.getElementById('submit-text');
+      btn.disabled = true;
+      text.innerText = selectedLanguage === 'hi' ? 'रिपोर्ट की व्याख्या की जा रही है...' : 'Translating jargon into plain language...';
+
+      setTimeout(() => {
+        generateInstantDemo(selectedLanguage);
+      }, 1200);
+    }
+  </script>
+</body>
+</html>

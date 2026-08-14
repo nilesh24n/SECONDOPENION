@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report History — Second Opinion</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="brand-logo">
+        Second<span>Opinion</span>
+      </a>
+      <div class="nav-links">
+        <a href="upload.html" class="nav-link">
+          <span>📤</span>
+          <span>Upload Report</span>
+        </a>
+        <a href="history.html" class="nav-link" style="color: var(--teal-deep); font-weight: 700;">
+          <span>📜</span>
+          <span>Report History</span>
+        </a>
+        <div id="nav-user-container"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="max-w-4xl mx-auto space-y-8">
+      
+      <!-- PAGE HEADER -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" style="border-bottom: 1px solid var(--sage-line); padding-bottom: 1.5rem;">
+        <div>
+          <div class="badge badge-sage mb-2">
+            <span>📜 Saved Over Time</span>
+          </div>
+          <h1 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">Medical Report History</h1>
+          <p class="text-xs" style="color: rgba(29,43,39,0.7); margin-top: 0.25rem;">
+            Access past report explanations, track lab trends, and view follow-up chats.
+          </p>
+        </div>
+
+        <a href="upload.html" class="btn btn-teal">
+          <span>+ Upload New Report</span>
+        </a>
+      </div>
+
+      <!-- SEARCH & FILTER BAR -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <input type="text" id="search-input" oninput="filterReports()" class="form-input flex-1" placeholder="Search reports by parameter, title, or keyword..." />
+
+        <select id="type-select" onchange="filterReports()" class="form-input" style="width: auto;">
+          <option value="all">All Document Types</option>
+          <option value="Blood Test">Blood Tests</option>
+          <option value="Prescription">Prescriptions</option>
+          <option value="Scan Report">Scan Reports</option>
+          <option value="General Lab Report">General Reports</option>
+        </select>
+      </div>
+
+      <!-- REPORTS LIST -->
+      <div id="reports-list" class="space-y-4">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    let allReports = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      allReports = StorageManager.getReports();
+      renderReports(allReports);
+    });
+
+    function filterReports() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const type = document.getElementById('type-select').value;
+
+      const filtered = allReports.filter(r => {
+        const matchesQuery = r.title.toLowerCase().includes(query) ||
+                             r.summary_explanation.toLowerCase().includes(query) ||
+                             r.key_findings.some(f => f.term.toLowerCase().includes(query));
+        const matchesType = type === 'all' || r.document_type === type;
+        return matchesQuery && matchesType;
+      });
+
+      renderReports(filtered);
+    }
+
+    function renderReports(reports) {
+      const container = document.getElementById('reports-list');
+      if (!reports || reports.length === 0) {
+        container.innerHTML = `
+          <div class="card text-center py-12 space-y-4">
+            <div style="font-size: 3rem;">📄</div>
+            <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">No Reports Found</h3>
+            <p class="text-xs" style="color: rgba(29,43,39,0.6);">
+              You haven't saved any reports yet or no report matched your search criteria.
+            </p>
+            <a href="upload.html" class="btn btn-teal">Upload Your First Report</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = reports.map(r => `
+        <div class="card space-y-4" style="cursor: pointer;" onclick="window.location.href='report.html?id=${r.id}'">
+          <div class="flex justify-between items-start">
+            <div class="space-y-1">
+              <div class="flex gap-2">
+                <span class="badge badge-teal-deep">${r.document_type}</span>
+                <span class="badge badge-sage">${r.language === 'hi' ? 'हिंदी' : 'English'}</span>
+              </div>
+              <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep); margin-top: 0.25rem;">${r.title}</h3>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <span class="text-xs" style="font-family: monospace; color: rgba(29,43,39,0.5);">📅 ${new Date(r.created_at).toLocaleDateString()}</span>
+              <button onclick="event.stopPropagation(); deleteReport('${r.id}')" class="btn btn-outline text-xs" style="color: var(--red-text); border-color: var(--red-border); padding: 0.375rem 0.5rem;" title="Delete">🗑️</button>
+            </div>
+          </div>
+
+          <p class="text-xs" style="color: rgba(29,43,39,0.8); background: var(--paper); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--sage-line);">
+            ${r.summary_explanation}
+          </p>
+
+          <div class="flex justify-between items-center text-xs font-semibold" style="color: var(--teal);">
+            <span>${r.key_findings.length} parameter findings</span>
+            <span>View Explanation & Chat →</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteReport(id) {
+      if (confirm('Delete this report from history?')) {
+        StorageManager.deleteReport(id);
+        allReports = StorageManager.getReports();
+        filterReports();
+      }
+    }
+  </script>
+</body>
+</html>

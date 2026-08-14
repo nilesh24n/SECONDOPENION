@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In / Register — Second Opinion</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body style="min-height: 100vh; display: flex; flex-direction: column;">
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="brand-logo">
+        Second<span>Opinion</span>
+      </a>
+      <div class="nav-links">
+        <a href="upload.html" class="nav-link">
+          <span>📤</span>
+          <span>Upload Report</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content flex items-center justify-between" style="padding-top: 3rem; padding-bottom: 3rem;">
+    <div class="card max-w-md mx-auto w-full" style="padding: 0; overflow: hidden;">
+      
+      <!-- HEADER BANNER -->
+      <div style="background: var(--teal-deep); color: var(--white); padding: 2rem; text-align: center;">
+        <div class="badge badge-sage mb-4" style="background: rgba(255,255,255,0.1); color: var(--marigold);">
+          <span>🛡️ Secure & Private Auth</span>
+        </div>
+        <h1 class="font-serif text-3xl font-bold" style="letter-spacing: -0.025em;">
+          Second<span style="color: var(--marigold);">Opinion</span>
+        </h1>
+        <p class="text-xs mt-2" style="color: rgba(255,255,255,0.8);" id="auth-subtitle">
+          Access your medical report history and plain language breakdowns
+        </p>
+      </div>
+
+      <!-- TABS -->
+      <div class="flex" style="border-bottom: 1px solid var(--sage-line); background: var(--sage);">
+        <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-3 text-sm font-semibold" style="background: var(--white); color: var(--teal-deep); border-bottom: 2px solid var(--teal);">
+          Sign In
+        </button>
+        <button id="tab-signup" onclick="switchTab('signup')" class="flex-1 py-3 text-sm font-semibold" style="color: rgba(29,43,39,0.6);">
+          Create Account
+        </button>
+      </div>
+
+      <!-- BODY -->
+      <div style="padding: 2rem;" class="space-y-6">
+        
+        <!-- GOOGLE OAUTH MOCK -->
+        <button onclick="handleGoogleSignIn()" class="btn btn-outline w-full" style="display: flex; gap: 0.75rem; justify-content: center; align-items: center;">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.25v3.13C3.23 21.3 7.35 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.63H1.25C.45 8.23 0 10.06 0 12s.45 3.77 1.25 5.37l4.03-3.13z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.23 2.7 1.25 6.63l4.03 3.13c.95-2.85 3.6-4.96 6.72-4.96z"/>
+          </svg>
+          <span>Continue with Google</span>
+        </button>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem; text-align: center; color: rgba(29,43,39,0.4); font-size: 0.75rem; text-transform: uppercase;">
+          <div style="flex: 1; height: 1px; background: var(--sage-line);"></div>
+          <span>or email</span>
+          <div style="flex: 1; height: 1px; background: var(--sage-line);"></div>
+        </div>
+
+        <!-- FORM -->
+        <form onsubmit="handleEmailSubmit(event)" class="space-y-4">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="auth-email" class="form-input" placeholder="you@example.com" required />
+          </div>
+
+          <div id="auth-error" style="display: none; font-size: 0.75rem; color: var(--red-text); background: var(--red-bg); padding: 0.5rem; border-radius: 0.5rem;"></div>
+
+          <button type="submit" class="btn btn-teal w-full" id="auth-submit-btn">
+            <span>Sign In with Email</span>
+            <span>→</span>
+          </button>
+        </form>
+
+        <!-- INSTANT DEMO MODE BUTTON -->
+        <div style="border-top: 1px solid var(--sage-line); padding-top: 1rem;">
+          <button onclick="handleDemoLogin()" class="btn btn-sage w-full text-xs">
+            <span>✨ Instant Demo Mode (No signup required)</span>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>© 2026 Second Opinion Health.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    let currentTab = 'login';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      const tabLogin = document.getElementById('tab-login');
+      const tabSignup = document.getElementById('tab-signup');
+      const btn = document.getElementById('auth-submit-btn');
+      const subtitle = document.getElementById('auth-subtitle');
+
+      if (tab === 'login') {
+        tabLogin.style.background = 'var(--white)';
+        tabLogin.style.color = 'var(--teal-deep)';
+        tabLogin.style.borderBottom = '2px solid var(--teal)';
+        tabSignup.style.background = 'transparent';
+        tabSignup.style.color = 'rgba(29,43,39,0.6)';
+        tabSignup.style.borderBottom = 'none';
+        btn.querySelector('span').innerText = 'Sign In with Email';
+        subtitle.innerText = 'Access your medical report history and plain language breakdowns';
+      } else {
+        tabSignup.style.background = 'var(--white)';
+        tabSignup.style.color = 'var(--teal-deep)';
+        tabSignup.style.borderBottom = '2px solid var(--teal)';
+        tabLogin.style.background = 'transparent';
+        tabLogin.style.color = 'rgba(29,43,39,0.6)';
+        tabLogin.style.borderBottom = 'none';
+        btn.querySelector('span').innerText = 'Create Free Account';
+        subtitle.innerText = 'Create your free account to save reports and ask follow-up questions';
+      }
+    }
+
+    function handleGoogleSignIn() {
+      const user = {
+        id: 'usr_google_' + Math.random().toString(36).substring(2, 9),
+        email: 'user.google@example.com',
+        name: 'Google User'
+      };
+      StorageManager.setUser(user);
+      window.location.href = 'upload.html';
+    }
+
+    function handleEmailSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value;
+      if (!email || !email.includes('@')) {
+        document.getElementById('auth-error').innerText = 'Please enter a valid email address.';
+        document.getElementById('auth-error').style.display = 'block';
+        return;
+      }
+      const user = {
+        id: 'usr_' + Math.random().toString(36).substring(2, 9),
+        email: email,
+        name: email.split('@')[0]
+      };
+      StorageManager.setUser(user);
+      window.location.href = 'upload.html';
+    }
+
+    function handleDemoLogin() {
+      const user = {
+        id: 'demo_patient_123',
+        email: 'patient@secondopinion.health',
+        name: 'Demo Patient'
+      };
+      StorageManager.setUser(user);
+      window.location.href = 'upload.html';
+    }
+  </script>
+</body>
+</html>

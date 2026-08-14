@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medical Report Breakdown — Second Opinion</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="brand-logo">
+        Second<span>Opinion</span>
+      </a>
+      <div class="nav-links">
+        <a href="upload.html" class="nav-link">
+          <span>📤</span>
+          <span>Upload Report</span>
+        </a>
+        <a href="history.html" class="nav-link">
+          <span>📜</span>
+          <span>Report History</span>
+        </a>
+        <div id="nav-user-container"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="max-w-4xl mx-auto space-y-8" id="report-container">
+      
+      <!-- TOP ACTION BAR -->
+      <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--sage-line); padding-bottom: 1rem;">
+        <a href="history.html" class="text-xs font-semibold" style="color: var(--teal); display: flex; items-center; gap: 0.25rem;">
+          <span>←</span>
+          <span>Back to All Reports</span>
+        </a>
+
+        <div class="flex items-center gap-2">
+          <button id="tts-summary-btn" onclick="toggleSummaryAudio()" class="btn btn-sage text-xs">
+            <span id="tts-icon">🔊</span>
+            <span id="tts-label">Listen to Summary</span>
+          </button>
+
+          <button onclick="handleDeleteReport()" class="btn btn-outline text-xs" style="color: var(--red-text); border-color: var(--red-border);" title="Delete report">
+            <span>🗑️</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- REPORT HEADER -->
+      <div class="card space-y-4" id="report-header-card">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <!-- PLAIN LANGUAGE SUMMARY CARD -->
+      <div class="card space-y-3" style="background: linear-gradient(135deg, var(--teal-deep), var(--teal)); color: var(--white); border: none;" id="summary-card">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <!-- KEY FINDINGS SECTION -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-serif text-2xl font-bold" style="color: var(--teal-deep);" id="findings-title">
+            Key Findings & Explanations
+          </h2>
+          <span class="text-xs" style="color: rgba(29,43,39,0.6);" id="findings-count"></span>
+        </div>
+
+        <div class="space-y-4" id="findings-list">
+          <!-- Dynamically rendered finding cards -->
+        </div>
+      </div>
+
+      <!-- UNCLEAR FLAGS BANNER -->
+      <div id="unclear-banner" class="card" style="background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); display: none;">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <!-- MANDATORY DISCLAIMER BOX -->
+      <div class="card flex items-start gap-4" style="background: var(--paper); border: 2px solid rgba(198, 130, 42, 0.4);">
+        <span style="font-size: 1.5rem;">🛡️</span>
+        <div class="space-y-1">
+          <h4 class="font-serif text-base font-bold" style="color: var(--teal-deep);">Important Safety Disclaimer</h4>
+          <p class="text-xs font-semibold" style="color: var(--teal-deep);" id="disclaimer-text"></p>
+        </div>
+      </div>
+
+      <!-- INTERACTIVE FOLLOW-UP CHAT -->
+      <div class="space-y-4" style="padding-top: 1rem;">
+        <h2 class="font-serif text-2xl font-bold" style="color: var(--teal-deep);" id="chat-title">
+          Ask Follow-up Questions
+        </h2>
+
+        <div class="chat-container">
+          <div class="chat-header">
+            <div class="flex items-center gap-3">
+              <div style="width: 2.25rem; height: 2.25rem; border-radius: 0.75rem; background: var(--marigold); color: var(--teal-deep); display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                🤖
+              </div>
+              <div>
+                <h3 class="font-serif text-lg font-semibold" id="chat-box-header">Follow-up Report Assistant</h3>
+                <p class="text-xs" style="opacity: 0.7;">Type or use voice mic to ask questions</p>
+              </div>
+            </div>
+            <button id="global-stop-audio" onclick="VoiceEngine.stopSpeaking()" class="badge badge-sage" style="display: none; background: var(--marigold); color: var(--teal-deep);">
+              <span>Stop Audio</span>
+            </button>
+          </div>
+
+          <div class="chat-messages" id="chat-messages-list">
+            <!-- Messages rendered here -->
+          </div>
+
+          <!-- MIC STATUS BAR -->
+          <div id="mic-status-bar" style="display: none; background: var(--red-bg); border-top: 1px solid var(--red-border); padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--red-text);" class="flex items-center justify-between">
+            <span>🎙️ Listening... Speak your question clearly into mic</span>
+            <button onclick="stopMicListening()" style="font-weight: 700; text-transform: uppercase;">Done</button>
+          </div>
+
+          <!-- CHAT INPUT FORM -->
+          <form onsubmit="handleSendChat(event)" class="chat-input-bar">
+            <button type="button" id="mic-btn" onclick="toggleMic()" class="btn btn-sage" style="padding: 0.75rem;" title="Click to speak using microphone">
+              <span id="mic-icon">🎙️</span>
+            </button>
+
+            <input type="text" id="chat-input" class="form-input" placeholder="Type or speak a question about this report..." style="background: var(--paper);" />
+
+            <button type="submit" class="btn btn-teal" style="padding: 0.75rem 1.25rem;">
+              <span>Send</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    let currentReport = null;
+    let isSpeakingSummary = false;
+    let isMicListening = false;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const reportId = params.get('id') || 'rep_demo_cbc_123';
+      currentReport = StorageManager.getReportById(reportId);
+
+      if (!currentReport) {
+        document.getElementById('report-container').innerHTML = `
+          <div class="text-center py-16 space-y-4">
+            <h2 class="font-serif text-2xl font-bold">Report Not Found</h2>
+            <a href="upload.html" class="btn btn-teal">Upload New Report</a>
+          </div>
+        `;
+        return;
+      }
+
+      renderReportPage();
+      renderChatMessages();
+      setupVoiceInput();
+    });
+
+    function renderReportPage() {
+      const isHindi = currentReport.language === 'hi';
+
+      // Header card
+      document.getElementById('report-header-card').innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex gap-2">
+            <span class="badge badge-teal-deep">${currentReport.document_type}</span>
+            <span class="badge badge-sage">${isHindi ? 'हिंदी' : 'English'}</span>
+          </div>
+          <span class="text-xs" style="color: rgba(29,43,39,0.5); font-family: monospace;">📅 ${new Date(currentReport.created_at).toLocaleDateString()}</span>
+        </div>
+        <h1 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">${currentReport.title}</h1>
+        ${currentReport.file_name ? `<p class="text-xs" style="color: rgba(29,43,39,0.6); font-family: monospace;">📄 File: ${currentReport.file_name}</p>` : ''}
+      `;
+
+      // Summary card
+      document.getElementById('summary-card').innerHTML = `
+        <div class="flex items-center gap-2" style="color: var(--marigold); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+          <span>✨ ${isHindi ? 'सरल भाषा में सारांश' : 'Plain Language Overview'}</span>
+        </div>
+        <p style="font-size: 1.125rem; line-height: 1.6; opacity: 0.95;">
+          ${currentReport.summary_explanation}
+        </p>
+      `;
+
+      // Findings
+      document.getElementById('findings-title').innerText = isHindi ? 'मुख्य परिणाम एवं स्पष्टीकरण' : 'Key Findings & Explanations';
+      document.getElementById('findings-count').innerText = `${currentReport.key_findings.length} parameters extracted`;
+
+      const listEl = document.getElementById('findings-list');
+      listEl.innerHTML = currentReport.key_findings.map(f => {
+        const isNormal = f.is_normal === true;
+        const badgeClass = isNormal ? 'badge-normal' : (f.is_normal === false ? 'badge-out-of-range' : 'badge-unclear');
+        const statusLabel = isNormal ? (isHindi ? 'सामान्य सीमा में' : 'Normal Range') : (f.is_normal === false ? (isHindi ? 'सीमा से बाहर' : 'Out of Range') : (isHindi ? 'समीक्षा आवश्यक' : 'Review Needed'));
+
+        return `
+          <div class="card space-y-4">
+            <div class="flex justify-between items-start" style="border-bottom: 1px solid var(--sage-line); padding-bottom: 0.75rem;">
+              <div>
+                <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">${f.term}</h3>
+                <p class="text-xs" style="font-family: monospace; color: rgba(29,43,39,0.7); margin-top: 0.25rem;">
+                  Value: <strong>${f.original_value}</strong> ${f.reference_range ? `| Ref Range: ${f.reference_range}` : ''}
+                </p>
+              </div>
+              <span class="badge ${badgeClass}">${statusLabel}</span>
+            </div>
+
+            <div style="background: rgba(228, 236, 229, 0.4); padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--sage-line);" class="space-y-1">
+              <div class="text-xs font-bold" style="color: var(--teal); text-transform: uppercase;">
+                ${isHindi ? 'सरल शब्दों में इसका क्या अर्थ है:' : 'In Plain Words:'}
+              </div>
+              <p class="text-sm" style="color: var(--teal-deep);">${f.plain_explanation}</p>
+            </div>
+
+            ${f.what_to_ask_doctor ? `
+              <div class="text-xs flex gap-2" style="background: var(--paper); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--sage-line);">
+                <span>❓</span>
+                <div>
+                  <strong style="color: var(--teal-deep);">${isHindi ? 'डॉक्टर से पूछें:' : 'What to ask your doctor:'}</strong> ${f.what_to_ask_doctor}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      // Unclear flags
+      if (currentReport.unclear_flags && currentReport.unclear_flags.length > 0) {
+        const unclearEl = document.getElementById('unclear-banner');
+        unclearEl.style.display = 'block';
+        unclearEl.innerHTML = `
+          <div class="font-bold text-xs uppercase mb-2">⚠️ ${isHindi ? 'अस्पष्ट या धुंधली जानकारी' : 'Unclear / Ambiguous Sections Flagged'}</div>
+          <ul style="padding-left: 1.25rem; font-size: 0.75rem;" class="space-y-1">
+            ${currentReport.unclear_flags.map(flag => `<li>${flag}</li>`).join('')}
+          </ul>
+        `;
+      }
+
+      // Disclaimer
+      document.getElementById('disclaimer-text').innerText = currentReport.disclaimer;
+    }
+
+    function toggleSummaryAudio() {
+      if (isSpeakingSummary) {
+        VoiceEngine.stopSpeaking();
+        isSpeakingSummary = false;
+        document.getElementById('tts-label').innerText = currentReport.language === 'hi' ? 'सारांश बोलकर सुनें' : 'Listen to Summary';
+      } else {
+        isSpeakingSummary = true;
+        document.getElementById('tts-label').innerText = 'Stop Audio';
+        VoiceEngine.speak(currentReport.summary_explanation, currentReport.language, () => {
+          isSpeakingSummary = false;
+          document.getElementById('tts-label').innerText = currentReport.language === 'hi' ? 'सारांश बोलकर सुनें' : 'Listen to Summary';
+        });
+      }
+    }
+
+    function renderChatMessages() {
+      const messages = StorageManager.getChatMessages(currentReport.id);
+      const list = document.getElementById('chat-messages-list');
+
+      if (messages.length === 0) {
+        list.innerHTML = `
+          <div class="text-center py-8 space-y-3" style="color: rgba(29,43,39,0.6);">
+            <p class="text-sm font-semibold" style="color: var(--teal-deep);">
+              ${currentReport.language === 'hi' ? 'इस रिपोर्ट के बारे में कोई भी प्रश्न पूछें' : 'Have a question about a specific lab value or medical term?'}
+            </p>
+            <div class="flex flex-wrap justify-center gap-2" style="margin-top: 1rem;">
+              <button onclick="sendQuickQuestion('Should I ask my doctor about my hemoglobin level?')" class="btn btn-sage text-xs">💡 Ask about hemoglobin level</button>
+              <button onclick="sendQuickQuestion('What does reference range mean in this report?')" class="btn btn-sage text-xs">💡 Explain reference range</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = messages.map(m => `
+        <div class="chat-bubble ${m.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}">
+          <div>${m.content}</div>
+          ${m.role === 'assistant' ? `
+            <button onclick="VoiceEngine.speak('${m.content.replace(/'/g, "\\'")}', '${currentReport.language}')" class="text-xs" style="margin-top: 0.5rem; opacity: 0.8; font-weight: 600;">
+              🔊 Listen
+            </button>
+          ` : ''}
+        </div>
+      `).join('');
+
+      list.scrollTop = list.scrollHeight;
+    }
+
+    function handleSendChat(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const userMsg = {
+        id: 'msg_u_' + Date.now(),
+        report_id: currentReport.id,
+        role: 'user',
+        content: text,
+        created_at: new Date().toISOString()
+      };
+      StorageManager.saveChatMessage(userMsg);
+      input.value = '';
+      renderChatMessages();
+
+      // Simulated Assistant Answer
+      setTimeout(() => {
+        let answer = `Regarding your query "${text}": The key values in your ${currentReport.document_type} indicate stable parameters overall. Hemoglobin and glucose are slightly out of range. Confirm with your doctor.\n\n${currentReport.disclaimer}`;
+        
+        if (text.toLowerCase().includes('hemoglobin') || text.toLowerCase().includes('hb')) {
+          answer = `Hemoglobin carries oxygen throughout your red blood cells. Your level of 11.2 g/dL is slightly below normal. Your doctor may suggest dietary iron adjustments.\n\n${currentReport.disclaimer}`;
+        }
+
+        const assistantMsg = {
+          id: 'msg_a_' + Date.now(),
+          report_id: currentReport.id,
+          role: 'assistant',
+          content: answer,
+          created_at: new Date().toISOString()
+        };
+        StorageManager.saveChatMessage(assistantMsg);
+        renderChatMessages();
+        VoiceEngine.speak(answer, currentReport.language);
+      }, 600);
+    }
+
+    function sendQuickQuestion(q) {
+      document.getElementById('chat-input').value = q;
+      handleSendChat();
+    }
+
+    function setupVoiceInput() {
+      VoiceEngine.initRecognition(
+        currentReport.language,
+        (transcript) => {
+          document.getElementById('chat-input').value = transcript;
+        },
+        (err) => {
+          console.warn('STT Error:', err);
+          stopMicListening();
+        },
+        () => {
+          stopMicListening();
+        }
+      );
+    }
+
+    function toggleMic() {
+      if (isMicListening) {
+        stopMicListening();
+      } else {
+        isMicListening = true;
+        document.getElementById('mic-status-bar').style.display = 'flex';
+        document.getElementById('mic-icon').innerText = '🔴';
+        VoiceEngine.startListening();
+      }
+    }
+
+    function stopMicListening() {
+      isMicListening = false;
+      document.getElementById('mic-status-bar').style.display = 'none';
+      document.getElementById('mic-icon').innerText = '🎙️';
+      VoiceEngine.stopListening();
+    }
+
+    function handleDeleteReport() {
+      if (confirm('Are you sure you want to delete this medical report?')) {
+        StorageManager.deleteReport(currentReport.id);
+        window.location.href = 'history.html';
+      }
+    }
+  </script>
+</body>
+</html>
