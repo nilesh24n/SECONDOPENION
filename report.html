@@ -14,7 +14,7 @@
       <a href="index.html" class="brand-logo">
         Second<span>Opinion</span>
       </a>
-      <div class="nav-links">
+      <div class="nav-links desktop-only">
         <a href="upload.html" class="nav-link">
           <span>📤</span>
           <span>Upload Report</span>
@@ -25,12 +25,18 @@
         </a>
         <div id="nav-user-container"></div>
       </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileDrawer()">☰</button>
     </div>
   </header>
 
+  <!-- MOBILE NAVIGATION DRAWER -->
+  <div id="mobile-drawer" class="mobile-drawer">
+    <div id="mobile-drawer-links"></div>
+  </div>
+
   <!-- MAIN CONTENT -->
   <main class="main-content">
-    <div class="max-w-4xl mx-auto space-y-8" id="report-container">
+    <div class="max-w-4xl mx-auto space-y-6" id="report-container">
       
       <!-- TOP ACTION BAR -->
       <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--sage-line); padding-bottom: 1rem;">
@@ -52,7 +58,7 @@
       </div>
 
       <!-- REPORT HEADER -->
-      <div class="card space-y-4" id="report-header-card">
+      <div class="card space-y-3" id="report-header-card">
         <!-- Dynamically rendered -->
       </div>
 
@@ -61,7 +67,7 @@
         <!-- Dynamically rendered -->
       </div>
 
-      <!-- KEY FINDINGS SECTION -->
+      <!-- KEY FINDINGS SECTION WITH VISUAL SPECTRUM GAUGES -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="font-serif text-2xl font-bold" style="color: var(--teal-deep);" id="findings-title">
@@ -71,7 +77,7 @@
         </div>
 
         <div class="space-y-4" id="findings-list">
-          <!-- Dynamically rendered finding cards -->
+          <!-- Dynamically rendered finding cards with Low/Normal/High visual spectrum gauges -->
         </div>
       </div>
 
@@ -81,10 +87,10 @@
       </div>
 
       <!-- MANDATORY DISCLAIMER BOX -->
-      <div class="card flex items-start gap-4" style="background: var(--paper); border: 2px solid rgba(198, 130, 42, 0.4);">
+      <div class="card flex items-start gap-3" style="background: var(--paper); border: 2px solid rgba(198, 130, 42, 0.4);">
         <span style="font-size: 1.5rem;">🛡️</span>
         <div class="space-y-1">
-          <h4 class="font-serif text-base font-bold" style="color: var(--teal-deep);">Important Safety Disclaimer</h4>
+          <h4 class="font-serif text-base font-bold" style="color: var(--teal-deep);">Important Patient Safety Note</h4>
           <p class="text-xs font-semibold" style="color: var(--teal-deep);" id="disclaimer-text"></p>
         </div>
       </div>
@@ -92,22 +98,22 @@
       <!-- INTERACTIVE FOLLOW-UP CHAT -->
       <div class="space-y-4" style="padding-top: 1rem;">
         <h2 class="font-serif text-2xl font-bold" style="color: var(--teal-deep);" id="chat-title">
-          Ask Follow-up Questions
+          Ask Questions About Your Report
         </h2>
 
         <div class="chat-container">
           <div class="chat-header">
             <div class="flex items-center gap-3">
-              <div style="width: 2.25rem; height: 2.25rem; border-radius: 0.75rem; background: var(--marigold); color: var(--teal-deep); display: flex; align-items: center; justify-content: center; font-weight: bold;">
+              <div style="width: 2.25rem; height: 2.25rem; border-radius: 0.75rem; background: var(--marigold); color: var(--teal-deep); display: flex; items-center; justify-content: center; font-weight: bold;">
                 🤖
               </div>
               <div>
-                <h3 class="font-serif text-lg font-semibold" id="chat-box-header">Follow-up Report Assistant</h3>
-                <p class="text-xs" style="opacity: 0.7;">Type or tap 🎙️ mic to speak your question</p>
+                <h3 class="font-serif text-lg font-semibold" id="chat-box-header">Indian Voice & Text Assistant</h3>
+                <p class="text-xs" style="opacity: 0.7;">Type or tap 🎙️ mic to speak in Hindi or English</p>
               </div>
             </div>
             <button id="global-stop-audio" onclick="stopAllAudio()" class="badge badge-sage" style="display: none; background: var(--marigold); color: var(--teal-deep); cursor: pointer;">
-              <span>Stop Audio</span>
+              <span>Stop Voice</span>
             </button>
           </div>
 
@@ -117,7 +123,7 @@
 
           <!-- MIC STATUS BAR -->
           <div id="mic-status-bar" style="display: none; background: var(--red-bg); border-top: 1px solid var(--red-border); padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--red-text);" class="flex items-center justify-between">
-            <span id="mic-status-text">🎙️ Listening... Speak your question into microphone</span>
+            <span id="mic-status-text">🎙️ Listening... Speak your medical question now</span>
             <button onclick="stopMicListening()" style="font-weight: 700; text-transform: uppercase;">Done Speaking</button>
           </div>
 
@@ -127,7 +133,7 @@
               <span id="mic-icon">🎙️</span>
             </button>
 
-            <input type="text" id="chat-input" class="form-input" placeholder="Type or speak a question about this report..." style="background: var(--paper);" />
+            <input type="text" id="chat-input" class="form-input" placeholder="Type or speak a question..." style="background: var(--paper);" />
 
             <button type="submit" class="btn btn-teal" style="padding: 0.75rem 1.25rem;">
               <span>Send</span>
@@ -176,8 +182,8 @@
           </div>
           <span class="text-xs" style="color: rgba(29,43,39,0.5); font-family: monospace;">📅 ${new Date(currentReport.created_at).toLocaleDateString()}</span>
         </div>
-        <h1 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">${currentReport.title}</h1>
-        ${currentReport.file_name ? `<p class="text-xs" style="color: rgba(29,43,39,0.6); font-family: monospace;">📄 File: ${currentReport.file_name}</p>` : ''}
+        <h1 class="font-serif text-2xl sm:text-3xl font-bold" style="color: var(--teal-deep);">${currentReport.title}</h1>
+        ${currentReport.file_name ? `<p class="text-xs" style="color: rgba(29,43,39,0.6); font-family: monospace;">📄 Source File: ${currentReport.file_name}</p>` : ''}
       `;
 
       // Summary card
@@ -185,20 +191,21 @@
         <div class="flex items-center gap-2" style="color: var(--marigold); font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
           <span>✨ ${isHindi ? 'सरल भाषा में सारांश' : 'Plain Language Overview'}</span>
         </div>
-        <p style="font-size: 1.125rem; line-height: 1.6; opacity: 0.95;">
+        <p style="font-size: 1.0625rem; line-height: 1.6; opacity: 0.95;">
           ${currentReport.summary_explanation}
         </p>
       `;
 
-      // Findings
-      document.getElementById('findings-title').innerText = isHindi ? 'मुख्य परिणाम एवं स्पष्टीकरण' : 'Key Findings & Explanations';
+      // Findings & Spectrum Gauges
+      document.getElementById('findings-title').innerText = isHindi ? 'मुख्य परिणाम एवं visual ग्राफ' : 'Key Findings & Visual Gauges';
       document.getElementById('findings-count').innerText = `${currentReport.key_findings.length} parameters extracted`;
 
       const listEl = document.getElementById('findings-list');
       listEl.innerHTML = currentReport.key_findings.map(f => {
         const isNormal = f.is_normal === true;
         const badgeClass = isNormal ? 'badge-normal' : (f.is_normal === false ? 'badge-out-of-range' : 'badge-unclear');
-        const statusLabel = isNormal ? (isHindi ? 'सामान्य सीमा में' : 'Normal Range') : (f.is_normal === false ? (isHindi ? 'सीमा से बाहर' : 'Out of Range') : (isHindi ? 'समीक्षा आवश्यक' : 'Review Needed'));
+        const statusLabel = f.level_label || (isNormal ? (isHindi ? 'सामान्य सीमा में' : 'Normal Range') : (isHindi ? 'सीमा से बाहर' : 'Out of Range'));
+        const gaugePos = Math.min(Math.max(f.gauge_percent || (isNormal ? 50 : 25), 5), 95);
 
         return `
           <div class="card space-y-4">
@@ -206,15 +213,33 @@
               <div>
                 <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">${f.term}</h3>
                 <p class="text-xs" style="font-family: monospace; color: rgba(29,43,39,0.7); margin-top: 0.25rem;">
-                  Value: <strong>${f.original_value}</strong> ${f.reference_range ? `| Ref Range: ${f.reference_range}` : ''}
+                  Your Result: <strong style="color: var(--teal-deep); font-size: 0.875rem;">${f.original_value}</strong> ${f.reference_range ? `| Target Range: ${f.reference_range}` : ''}
                 </p>
               </div>
               <span class="badge ${badgeClass}">${statusLabel}</span>
             </div>
 
+            <!-- VISUAL HEALTH RANGE SPECTRUM GAUGE -->
+            <div class="health-gauge-container">
+              <div class="gauge-labels">
+                <span class="gauge-label-low">Low / Deficient</span>
+                <span class="gauge-label-normal">Normal Range</span>
+                <span class="gauge-label-high">High / Elevated</span>
+              </div>
+              <div class="gauge-track">
+                <div class="gauge-pin" style="left: ${gaugePos}%;" title="Your Value: ${f.original_value}"></div>
+              </div>
+              <div class="gauge-legend">
+                <span>Low (&lt; ${f.min_ref || 'Min'})</span>
+                <span>Your Result: ${f.original_value}</span>
+                <span>High (&gt; ${f.max_ref || 'Max'})</span>
+              </div>
+            </div>
+
+            <!-- PLAIN LANGUAGE EXPLANATION -->
             <div style="background: rgba(228, 236, 229, 0.4); padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--sage-line);" class="space-y-1">
               <div class="text-xs font-bold" style="color: var(--teal); text-transform: uppercase;">
-                ${isHindi ? 'सरल शब्दों में इसका क्या अर्थ है:' : 'In Plain Words:'}
+                ${isHindi ? 'सरल शब्दों में इसका क्या अर्थ है:' : 'In Simple Plain Language:'}
               </div>
               <p class="text-sm" style="color: var(--teal-deep);">${f.plain_explanation}</p>
             </div>
@@ -253,7 +278,7 @@
       } else {
         stopAllAudio();
         isSpeakingSummary = true;
-        document.getElementById('tts-label').innerText = 'Stop Audio';
+        document.getElementById('tts-label').innerText = 'Stop Voice';
         document.getElementById('global-stop-audio').style.display = 'inline-flex';
         VoiceEngine.speak(currentReport.summary_explanation, currentReport.language, () => {
           isSpeakingSummary = false;
@@ -315,7 +340,7 @@
           <div>${escapeHtml(m.content)}</div>
           ${m.role === 'assistant' ? `
             <button onclick="playMessageAudio('${m.id}')" class="text-xs" style="margin-top: 0.5rem; opacity: 0.85; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.25rem;">
-              🔊 <span>Listen</span>
+              🔊 <span>Listen in Indian Accent</span>
             </button>
           ` : ''}
         </div>
@@ -351,12 +376,12 @@
       input.value = '';
       renderChatMessages();
 
-      // Simulated Assistant Answer
+      // Simulated Assistant Answer in Indian Accent
       setTimeout(() => {
-        let answer = `Regarding your query "${text}": The key values in your ${currentReport.document_type} indicate stable parameters overall. Hemoglobin and glucose are slightly out of range. Confirm with your doctor.\n\n${currentReport.disclaimer}`;
+        let answer = `Regarding your question "${text}": Overall your report parameters are stable. Hemoglobin is slightly lower than normal and fasting glucose is borderline high. Please discuss with your doctor.\n\n${currentReport.disclaimer}`;
         
         if (text.toLowerCase().includes('hemoglobin') || text.toLowerCase().includes('hb')) {
-          answer = `Hemoglobin carries oxygen throughout your red blood cells. Your level of 11.2 g/dL is slightly below normal. Your doctor may suggest dietary iron adjustments.\n\n${currentReport.disclaimer}`;
+          answer = `Hemoglobin carries oxygen in your blood. Your level of 11.2 g/dL is slightly below normal. Your doctor may suggest dietary iron adjustments like spinach or lentils.\n\n${currentReport.disclaimer}`;
         }
 
         const assistantMsg = {
@@ -396,7 +421,7 @@
 
         if (started) {
           document.getElementById('mic-status-bar').style.display = 'flex';
-          document.getElementById('mic-status-text').innerText = '🎙️ Listening... Speak your question into microphone';
+          document.getElementById('mic-status-text').innerText = '🎙️ Listening... Speak your medical question now';
           document.getElementById('mic-icon').innerText = '🔴';
         }
       }

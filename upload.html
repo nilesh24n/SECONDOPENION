@@ -14,7 +14,7 @@
       <a href="index.html" class="brand-logo">
         Second<span>Opinion</span>
       </a>
-      <div class="nav-links">
+      <div class="nav-links desktop-only">
         <a href="upload.html" class="nav-link" style="color: var(--teal-deep); font-weight: 700;">
           <span>📤</span>
           <span>Upload Report</span>
@@ -25,19 +25,25 @@
         </a>
         <div id="nav-user-container"></div>
       </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileDrawer()">☰</button>
     </div>
   </header>
 
+  <!-- MOBILE NAVIGATION DRAWER -->
+  <div id="mobile-drawer" class="mobile-drawer">
+    <div id="mobile-drawer-links"></div>
+  </div>
+
   <!-- MAIN CONTENT -->
   <main class="main-content">
-    <div class="max-w-3xl mx-auto space-y-8">
+    <div class="max-w-3xl mx-auto space-y-6">
       
       <!-- HEADER -->
-      <div class="text-center space-y-3">
+      <div class="text-center space-y-2">
         <div class="badge badge-sage">
           <span>✨ Step 1: Upload Document</span>
         </div>
-        <h1 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">
+        <h1 class="font-serif text-2xl sm:text-3xl font-bold" style="color: var(--teal-deep);">
           Upload Your Medical Report
         </h1>
         <p class="text-sm" style="color: rgba(29,43,39,0.7); max-width: 32rem; margin: 0 auto;">
@@ -52,21 +58,21 @@
             ⚡
           </div>
           <div>
-            <h4 class="font-serif text-base font-semibold">Test Voice & Report Features Instantly</h4>
+            <h4 class="font-serif text-base font-semibold">Test Gauges & Indian Voice Instantly</h4>
             <p class="text-xs" style="color: rgba(255,255,255,0.8);">
               Don't have a document file right now? Load a sample blood test report in 1-click.
             </p>
           </div>
         </div>
 
-        <button type="button" onclick="generateInstantDemo(selectedLanguage)" class="btn btn-marigold text-xs" style="white-space: nowrap;">
+        <button type="button" onclick="generateInstantDemo(selectedLanguage)" class="btn btn-marigold text-xs w-full sm:w-auto" style="white-space: nowrap;">
           <span>Try Sample Report</span>
           <span>→</span>
         </button>
       </div>
 
       <!-- MAIN UPLOAD CARD -->
-      <div class="card space-y-8" style="padding: 2.5rem;">
+      <div class="card space-y-6">
         
         <!-- LANGUAGE SELECTOR -->
         <div class="space-y-3">
@@ -75,16 +81,16 @@
             <span>Select Explanation Language</span>
           </label>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-            <button type="button" id="lang-btn-en" onclick="selectLang('en')" class="btn btn-outline flex items-center justify-center gap-3" style="border-color: var(--teal); background: rgba(22,66,60,0.05); font-weight: 700;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <button type="button" id="lang-btn-en" onclick="selectLang('en')" class="btn btn-outline flex items-center justify-center gap-2" style="border-color: var(--teal); background: rgba(22,66,60,0.05); font-weight: 700;">
               <span style="font-size: 1.25rem;">🇬🇧</span>
               <div style="text-align: left;">
                 <div style="font-size: 0.875rem;">English</div>
-                <div style="font-size: 0.6875rem; font-weight: 400; opacity: 0.7;">Plain English terms</div>
+                <div style="font-size: 0.6875rem; font-weight: 400; opacity: 0.7;">Indian English accent</div>
               </div>
             </button>
 
-            <button type="button" id="lang-btn-hi" onclick="selectLang('hi')" class="btn btn-outline flex items-center justify-center gap-3" style="border-color: var(--sage-line);">
+            <button type="button" id="lang-btn-hi" onclick="selectLang('hi')" class="btn btn-outline flex items-center justify-center gap-2" style="border-color: var(--sage-line);">
               <span style="font-size: 1.25rem;">🇮🇳</span>
               <div style="text-align: left;">
                 <div style="font-size: 0.875rem;">हिंदी (Hindi)</div>
@@ -100,12 +106,12 @@
 
           <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
             <div class="drop-icon">
-              <span style="font-size: 2rem;">📥</span>
+              <span style="font-size: 1.75rem;">📥</span>
             </div>
 
             <div class="space-y-1" id="file-display-area">
               <p class="font-serif text-lg font-semibold" style="color: var(--teal-deep);">
-                Drag and drop your report here
+                Tap or drag report file here
               </p>
               <p class="text-xs" style="color: rgba(29,43,39,0.6);">
                 Supports JPG, PNG, WebP photos or PDF documents up to 10MB
@@ -122,12 +128,12 @@
         <div id="upload-error" style="display: none;" class="card" style="background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); font-size: 0.75rem;"></div>
 
         <!-- SUBMIT BUTTON -->
-        <button type="button" id="submit-btn" onclick="submitUpload()" class="btn btn-teal w-full" style="padding: 1rem; font-size: 1rem;">
-          <span id="submit-text">Explain Report in Plain Language</span>
+        <button type="button" id="submit-btn" onclick="submitUpload()" class="btn btn-teal w-full" style="padding: 0.875rem; font-size: 0.9375rem;">
+          <span id="submit-text">Explain Report with Visual Gauges</span>
           <span>→</span>
         </button>
 
-        <div style="background: var(--paper); padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--sage-line); display: flex; items-center; gap: 0.75rem; font-size: 0.75rem; color: rgba(29,43,39,0.8);">
+        <div style="background: var(--paper); padding: 0.875rem; border-radius: 0.75rem; border: 1px solid var(--sage-line); display: flex; items-center; gap: 0.625rem; font-size: 0.75rem; color: rgba(29,43,39,0.8);">
           <span>✅</span>
           <span>Your document is analyzed securely. Second Opinion never provides prescriptions or medical diagnoses.</span>
         </div>

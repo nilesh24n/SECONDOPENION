@@ -15,7 +15,7 @@
       <a href="index.html" class="brand-logo">
         Second<span>Opinion</span>
       </a>
-      <div class="nav-links">
+      <div class="nav-links desktop-only">
         <a href="upload.html" class="nav-link">
           <span>📤</span>
           <span>Upload Report</span>
@@ -26,8 +26,14 @@
         </a>
         <div id="nav-user-container"></div>
       </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileDrawer()">☰</button>
     </div>
   </header>
+
+  <!-- MOBILE NAVIGATION DRAWER -->
+  <div id="mobile-drawer" class="mobile-drawer">
+    <div id="mobile-drawer-links"></div>
+  </div>
 
   <!-- MAIN CONTENT -->
   <main class="main-content">
@@ -36,14 +42,14 @@
     <section class="hero-grid">
       <div>
         <div class="badge badge-sage mb-4">
-          <span>✨ Your report, explained plainly</span>
+          <span>✨ Your medical report, explained simply</span>
         </div>
         <h1 class="hero-title">
           Your test report says a lot. <br />
           <span style="font-style: italic; font-weight: 400;">Nobody ever explains what it means.</span>
         </h1>
         <p class="hero-subtitle">
-          Upload a blood test, prescription, or scan report. Get a clear, plain-language explanation in Hindi or English — what each value means, and what's worth asking your doctor about.
+          Upload a blood test, prescription, or scan report. Get a clear, plain-language breakdown in Indian English or Hindi — what each value means, with visual Low-Normal-High gauges.
         </p>
 
         <div class="hero-actions">
@@ -108,8 +114,8 @@
     </section>
 
     <!-- HOW IT WORKS -->
-    <section style="padding: 3rem 0; border-top: 1px solid var(--sage-line);">
-      <div style="margin-bottom: 2rem;">
+    <section style="padding: 2.5rem 0; border-top: 1px solid var(--sage-line);">
+      <div style="margin-bottom: 1.5rem;">
         <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--marigold-deep);">How it works</div>
         <h2 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">Three simple steps to clarity</h2>
       </div>
@@ -125,56 +131,54 @@
 
         <div class="feature-card">
           <div class="feature-num">02</div>
-          <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">AI Document Reader</h3>
+          <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">Visual Gauges & AI Explanation</h3>
           <p class="text-sm" style="color: rgba(29,43,39,0.7);">
-            Gemini AI analyzes every value, flags out-of-range metrics, and translates jargon into simple English or Hindi.
+            See Low-Normal-High visual spectrum meters for every value, translated into simple English or Hindi.
           </p>
         </div>
 
         <div class="feature-card">
           <div class="feature-num">03</div>
-          <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">Interactive Q&A & Voice</h3>
+          <h3 class="font-serif text-xl font-bold" style="color: var(--teal-deep);">Talk to Indian Voice Assistant</h3>
           <p class="text-sm" style="color: rgba(29,43,39,0.7);">
-            Ask follow-up questions by typing or speaking. Listen to answers read aloud in your preferred language.
+            Tap the floating voice button anywhere to speak questions and listen to clear spoken answers.
           </p>
         </div>
       </div>
     </section>
 
     <!-- VOICE FEATURE CARD -->
-    <section class="card" style="background: var(--sage); padding: 2.5rem; margin-bottom: 3rem;">
-      <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: center;">
-        <div class="space-y-4">
-          <div class="badge badge-teal-deep">
-            <span>🎙️ Web Speech API Powered</span>
-          </div>
-          <h3 class="font-serif text-2xl font-bold" style="color: var(--teal-deep);">
-            Speak your questions. Listen to explanations out loud.
-          </h3>
-          <p class="text-sm" style="color: rgba(29,43,39,0.8);">
-            Don't want to type? Tap the microphone to ask questions about your report in English or Hindi. You can also press the listen button to hear the explanation read to you in clear speech.
-          </p>
+    <section class="card" style="background: var(--sage); padding: 2rem; margin-bottom: 2.5rem;">
+      <div class="space-y-3">
+        <div class="badge badge-teal-deep">
+          <span>🎙️ Indian Accent Voice Assistant</span>
         </div>
+        <h3 class="font-serif text-2xl font-bold" style="color: var(--teal-deep);">
+          Speak your medical questions. Listen to answers in Indian accent out loud.
+        </h3>
+        <p class="text-sm" style="color: rgba(29,43,39,0.8);">
+          Don't want to type? Tap the floating voice button at the bottom right anytime to ask questions about your report in Hindi or English.
+        </p>
       </div>
     </section>
 
     <!-- TRUST BAND -->
-    <section style="background: var(--teal-deep); color: var(--white); border-radius: var(--radius-xl); padding: 2.5rem; margin-bottom: 3rem;" class="space-y-6">
+    <section style="background: var(--teal-deep); color: var(--white); border-radius: var(--radius-xl); padding: 2rem; margin-bottom: 2.5rem;" class="space-y-4">
       <div>
         <h2 class="font-serif text-2xl font-bold">Built for peace of mind</h2>
-        <p style="color: rgba(255,255,255,0.8);" class="text-sm mt-2">
+        <p style="color: rgba(255,255,255,0.8);" class="text-sm mt-1">
           Medical jargon causes unnecessary anxiety. Second Opinion brings clarity while upholding strict safety boundaries.
         </p>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
         <div class="flex gap-2 items-center">
           <span style="color: var(--marigold);">✔</span>
           <span class="text-sm"><strong>No Prescriptions:</strong> We never suggest medicines or alter treatments.</span>
         </div>
         <div class="flex gap-2 items-center">
           <span style="color: var(--marigold);">✔</span>
-          <span class="text-sm"><strong>Honest Unclear Flags:</strong> Blurry or illegible sections are flagged honestly.</span>
+          <span class="text-sm"><strong>Visual Gauges:</strong> Low / Normal / High spectrum lines for all lab values.</span>
         </div>
         <div class="flex gap-2 items-center">
           <span style="color: var(--marigold);">✔</span>
@@ -182,18 +186,18 @@
         </div>
         <div class="flex gap-2 items-center">
           <span style="color: var(--marigold);">✔</span>
-          <span class="text-sm"><strong>Bilingual Support:</strong> Instant toggle between English and Hindi.</span>
+          <span class="text-sm"><strong>Bilingual Voice:</strong> Speak or listen in Hindi or Indian English.</span>
         </div>
       </div>
     </section>
 
     <!-- FINAL CTA -->
-    <section class="text-center space-y-4" style="padding: 3rem 0; max-width: 32rem; margin: 0 auto;">
+    <section class="text-center space-y-4" style="padding: 2.5rem 0; max-width: 32rem; margin: 0 auto;">
       <h2 class="font-serif text-3xl font-bold" style="color: var(--teal-deep);">
         Ready to understand your report?
       </h2>
       <p class="text-sm" style="color: rgba(29,43,39,0.7);">
-        Upload your document now and get a plain language breakdown in seconds.
+        Upload your document now and get a plain language breakdown with visual gauges in seconds.
       </p>
       <div>
         <a href="upload.html" class="btn btn-teal">
