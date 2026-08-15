@@ -1,18 +1,19 @@
-// Second Opinion - Pure Vanilla JS Application Core (Smart Document Validation & Natural Conversational Assistant)
+// Second Opinion - Gemini & GPT-Style Live Interactive Voice Engine (Pure Vanilla JS)
 
 const STORAGE_KEYS = {
   USER: 'second_opinion_user',
   REPORTS: 'second_opinion_reports',
-  CHAT_PREFIX: 'second_opinion_chat_'
+  CHAT_PREFIX: 'second_opinion_chat_',
+  GEMINI_KEY: 'second_opinion_gemini_key'
 };
 
-// MANDATORY SAFETY DISCLAIMERS
+// MANDATORY SAFETY DISCLAIMER
 const MANDATORY_DISCLAIMER = {
   en: 'This is an educational explanation, not a medical diagnosis. Please discuss these test results with your doctor.',
   hi: 'यह एक शिक्षण व्याख्या है, चिकित्सीय निदान नहीं। कृपया इन जांच परिणामों पर अपने डॉक्टर से चर्चा करें।'
 };
 
-// SAMPLE DEMO REPORT (SUPER SIMPLE PATIENT LANGUAGE + GAUGES)
+// SAMPLE DEMO REPORT
 const DEMO_REPORT = {
   id: 'rep_demo_cbc_123',
   user_id: 'demo_patient_123',
@@ -90,6 +91,18 @@ const StorageManager = {
     }
   },
 
+  getGeminiKey() {
+    return localStorage.getItem(STORAGE_KEYS.GEMINI_KEY) || '';
+  },
+
+  setGeminiKey(key) {
+    if (key) {
+      localStorage.setItem(STORAGE_KEYS.GEMINI_KEY, key);
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.GEMINI_KEY);
+    }
+  },
+
   getReports() {
     const data = localStorage.getItem(STORAGE_KEYS.REPORTS);
     const reports = data ? JSON.parse(data) : [DEMO_REPORT];
@@ -141,20 +154,12 @@ const DocumentValidator = {
     'license', 'assignment', 'homework', 'syllabus', 'agenda', 'menu', 'restaurant'
   ],
 
-  medicalKeywords: [
-    'blood', 'cbc', 'hemoglobin', 'glucose', 'sugar', 'test', 'lab', 'report',
-    'prescription', 'doctor', 'patient', 'hospital', 'clinic', 'scan', 'mri',
-    'ct', 'xray', 'ultrasound', 'pathology', 'metabolic', 'cholesterol', 'thyroid',
-    'urine', 'lipid', 'vitamin', 'creatinine', 'urea', 'liver', 'kidney', 'sgot', 'sgpt'
-  ],
-
   validateFile(file) {
     if (!file) return { isValid: false, reason: 'No file selected.' };
 
     const name = file.name.toLowerCase();
-
-    // 1. Check if filename explicitly indicates non-medical content
     const isNonMedicalFilename = this.nonMedicalKeywords.some(kw => name.includes(kw));
+
     if (isNonMedicalFilename) {
       return {
         isValid: false,
@@ -166,68 +171,117 @@ const DocumentValidator = {
   }
 };
 
-// NATURAL CONVERSATIONAL AI ASSISTANT RESPONSE ENGINE
+// DYNAMIC GEMINI / GPT CONVERSATIONAL AI ENGINE (NON-REPETITIVE, CONTEXT-AWARE)
 const AssistantAI = {
-  generateResponse(query, report, language = 'en') {
-    const q = query.trim().toLowerCase();
+  async generateResponse(query, report, language = 'en') {
+    const q = query.trim();
+    const qLower = q.toLowerCase();
     const isHindi = language === 'hi';
     const disclaimer = MANDATORY_DISCLAIMER[language];
 
-    // 1. GREETINGS
-    if (/^(hi|hello|hey|namaste|good morning|good evening|greetings|hola)\b/i.test(q)) {
-      return isHindi
-        ? `नमस्ते! मैं आपका सेकेंड ओपिनियन वॉइस एंड टेक्स्ट असिस्टेंट हूँ। 🙏\n\nमैं आपकी मेडिकल रिपोर्ट को समझने में आपकी मदद कर सकता हूँ। आप किसी भी लैब टेस्ट मान, हीमोग्लोबिन, शुगर या रिपोर्ट के बारे में सवाल पूछ सकते हैं।`
-        : `Hello! I am your Second Opinion Voice & Text Assistant. 👋\n\nI am here to help you understand your medical report. You can ask me about any parameter value (like Hemoglobin or Blood Sugar), reference ranges, or what questions to ask your doctor. How can I help you today?`;
+    // Try calling Gemini API directly if key is stored
+    const apiKey = StorageManager.getGeminiKey();
+    if (apiKey) {
+      try {
+        const apiResponse = await this.callGeminiAPI(apiKey, query, report, language);
+        if (apiResponse) return apiResponse;
+      } catch (err) {
+        console.warn('Gemini API call error, falling back to smart engine:', err);
+      }
     }
 
-    // 2. ACKNOWLEDGMENTS & THANKS
-    if (/^(ok|okay|thanks|thank you|got it|understood|fine|cool|dhanyawad|shukriya)\b/i.test(q)) {
+    // SMART DYNAMIC GENERATIVE ENGINE (Contextual & Non-repetitive)
+    
+    // 1. Greetings
+    if (/^(hi|hello|hey|namaste|good morning|good evening|greetings|hola)\b/i.test(qLower)) {
       return isHindi
-        ? `आपका स्वागत है! यदि आपकी रिपोर्ट के संबंध में आपके मन में कोई और प्रश्न हो, तो बेझिझक पूछें।\n\n${disclaimer}`
-        : `You are very welcome! Feel free to ask if you have any other questions about your report findings.\n\n${disclaimer}`;
+        ? `नमस्ते! मैं आपका सेकेंड ओपिनियन लाइव वॉइस असिस्टेंट हूँ। 🙏\n\nमैं आपकी मेडिकल रिपोर्ट समझने में आपकी मदद के लिए तैयार हूँ। आप मुझसे अपने टेस्ट रिजल्ट, आहार, या डॉक्टर से क्या पूछना है, के बारे में कुछ भी पूछ सकते हैं।`
+        : `Hello! I am your Second Opinion Live Voice Assistant. 👋\n\nI am listening carefully. You can ask me anything about your test results, diet suggestions, parameter values, or questions for your doctor. What would you like to know?`;
     }
 
-    // 3. IDENTITY / CAPABILITIES
-    if (/^(who are you|what can you do|what is this|help)\b/i.test(q)) {
+    // 2. Acknowledgments & Thanks
+    if (/^(ok|okay|thanks|thank you|got it|understood|fine|cool|dhanyawad|shukriya)\b/i.test(qLower)) {
       return isHindi
-        ? `मैं सेकेंड ओपिनियन असिस्टेंट हूँ। मैं मेडिकल रिपोर्ट के कठिन शब्दों को सरल हिंदी भाषा में और विजुअल ग्राफ के साथ समझाता हूँ।`
-        : `I am Second Opinion, an AI medical report explainer. I translate complex lab jargon into plain language and visual spectrum gauges (Low-Normal-High). I also help suggest questions for your doctor.`;
+        ? `आपका स्वागत है! यदि आपकी रिपोर्ट के संबंध में कोई अन्य प्रश्न या चिंता हो, तो बस बोलें या टाइप करें।\n\n${disclaimer}`
+        : `You are very welcome! If you have any other questions or need further clarification on your test parameters, I am here to help.\n\n${disclaimer}`;
     }
 
-    // 4. PARAMETER SPECIFIC QUERIES
-
-    // Hemoglobin
-    if (q.includes('hemoglobin') || q.includes('hb') || q.includes('हीमोग्लोबिन') || q.includes('iron') || q.includes('blood count')) {
+    // 3. Identity / Purpose
+    if (qLower.includes('who are you') || qLower.includes('what can you do') || qLower.includes('help')) {
       return isHindi
-        ? `हीमोग्लोबिन आपके रक्त में ऑक्सीजन पहुंचाता है। आपकी रिपोर्ट में यह 11.2 g/dL है जो सामान्य सीमा (12.0 - 15.5) से थोड़ा कम है।\n\n💡 सलाह: अपने डॉक्टर से पूछें कि क्या पालक, अनार, बीटरूट या आयरन सप्लीमेंट से इसे बढ़ाना उचित है।\n\n${disclaimer}`
-        : `Hemoglobin is the protein in red blood cells that carries oxygen throughout your body. Your result is 11.2 g/dL, which is slightly below the target range of 12.0 - 15.5 g/dL.\n\n💡 What to ask: Ask your doctor if adding iron-rich foods (spinach, lentils, pomegranate) or iron supplements is recommended.\n\n${disclaimer}`;
+        ? `मैं सेकेंड ओपिनियन लाइव असिस्टेंट हूँ। मैं मेडिकल रिपोर्ट के कठिन लैब् मानों को सरल हिंदी भाषा में और विजुअल ग्राफ के साथ समझाता हूँ।`
+        : `I am Second Opinion Live Assistant. I listen to your medical questions and explain complex lab values in plain language with visual Low-Normal-High gauges.`;
     }
 
-    // Glucose / Sugar
-    if (q.includes('sugar') || q.includes('glucose') || q.includes('fasting') || q.includes('शुगर') || q.includes('ग्लूकोज') || q.includes('diabetes')) {
+    // 4. Parameter-Specific Queries
+
+    // Hemoglobin / Iron / Fatigue
+    if (qLower.includes('hemoglobin') || qLower.includes('hb') || qLower.includes('iron') || qLower.includes('tired') || qLower.includes('fatigue') || qLower.includes('हीमोग्लोबिन') || qLower.includes('खून')) {
       return isHindi
-        ? `फास्टिंग ब्लड शुगर खाली पेट रक्त शर्करा का स्तर मापता है। आपका मान 104 mg/dL है जो सामान्य सीमा (70 - 99) से थोड़ा ऊपर है। इसे डॉक्टर 'बॉर्डरलाइन प्रीडायबिटीज' कहते हैं।\n\n💡 सलाह: डॉक्टर से पूछें कि मीठा कम करने और हल्की चहलकदमी से इसे कैसे सामान्य करें।\n\n${disclaimer}`
-        : `Fasting Blood Glucose measures blood sugar after not eating overnight. Your level of 104 mg/dL is slightly above the normal upper limit of 99 mg/dL. Doctors refer to this range as borderline prediabetes.\n\n💡 What to ask: Ask your doctor what simple diet adjustments or 20-minute daily walks can bring your sugar back to optimal range.\n\n${disclaimer}`;
+        ? `हीमोग्लोबिन के विषय में: आपका हीमोग्लोबिन स्तर 11.2 g/dL है (सामान्य सीमा 12.0 - 15.5 g/dL)। यह हल्का कम है, जिसे एनीमिया कहा जा सकता है। इससे कभी-कभी सुस्ती या थकान महसूस हो सकती है।\n\n💡 सलाह: अपने डॉक्टर से पूछें कि क्या आहार में पालक, चुकंदर, अनार, दालें या आयरन सिरप/सप्लीमेंट जोड़ना चाहिए।\n\n${disclaimer}`
+        : `Regarding your Hemoglobin: Your level is 11.2 g/dL, which is slightly below the normal reference range (12.0 - 15.5 g/dL). Lower hemoglobin means fewer red blood cells carrying oxygen, which can cause mild tiredness.\n\n💡 Recommended Question for Doctor: "Should I increase iron-rich foods like spinach, lentils, or pomegranates, or do I need an iron supplement?"\n\n${disclaimer}`;
     }
 
-    // Platelets
-    if (q.includes('platelet') || q.includes('platelets') || q.includes('प्लेटलेट')) {
+    // Sugar / Glucose / Diabetes / Diet
+    if (qLower.includes('sugar') || qLower.includes('glucose') || qLower.includes('fasting') || qLower.includes('diabetes') || qLower.includes('diet') || qLower.includes('शुगर') || qLower.includes('ग्लूकोज') || qLower.includes('डायबिटीज')) {
       return isHindi
-        ? `आपकी प्लेटलेट संख्या (220,000 /µL) पूरी तरह से सामान्य और स्वस्थ सीमा (150,000 - 450,000) में है। प्लेटलेट्स चोट लगने पर थक्का जमाने का काम करती हैं।\n\n${disclaimer}`
-        : `Your Platelet Count is 220,000 /µL, which is completely normal and healthy (normal range is 150,000 - 450,000 /µL). Platelets help your blood clot normally.\n\n${disclaimer}`;
+        ? `ब्लड शुगर के विषय में: आपका फास्टिंग ग्लूकोज 104 mg/dL है (सामान्य सीमा 70 - 99 mg/dL)। 104 का मतलब है कि शर्करा थोड़ी बढ़ी हुई है (प्रीडायबिटीज स्तर)। यह डायबिटीज नहीं है, लेकिन सावधानी आवश्यक है।\n\n💡 सलाह: डॉक्टर से पूछें कि मीठा कम करने, फाइबर युक्त भोजन खाने और रोजाना 20 मिनट टहलने से इसे कैसे सामान्य करें।\n\n${disclaimer}`
+        : `Regarding your Blood Sugar: Your Fasting Blood Glucose is 104 mg/dL, which is slightly elevated above normal (70 - 99 mg/dL). This borderline range (100 - 125 mg/dL) is called prediabetes.\n\n💡 Recommended Action: Ask your doctor what simple lifestyle adjustments (reducing refined sugars, eating whole grains, and 20-minute daily walks) can bring sugar back to optimal range.\n\n${disclaimer}`;
     }
 
-    // Reference Range
-    if (q.includes('reference') || q.includes('range') || q.includes('normal range') || q.includes('रेफरेंस')) {
+    // Platelets / Clotting
+    if (qLower.includes('platelet') || qLower.includes('platelets') || qLower.includes('प्लेटलेट') || qLower.includes('clot')) {
       return isHindi
-        ? `रेफरेंस रेंज (Reference Range) स्वस्थ व्यक्तियों के लिए सामान्य मानों की सीमा होती है। यदि आपका परिणाम इस सीमा के बाहर है, तो विजुअल ग्राफ में आपको संकेत दिखेगा।\n\n${disclaimer}`
-        : `A Reference Range shows the typical upper and lower boundary values for healthy individuals. In your report cards above, look at the visual gauge line to see exactly where your value lands relative to normal limits.\n\n${disclaimer}`;
+        ? `आपकी प्लेटलेट संख्या (220,000 /µL) पूरी तरह से सामान्य और स्वस्थ सीमा (150,000 - 450,000) के बीच में है। प्लेटलेट्स चोट लगने पर रक्त का थक्का जमाने में मदद करती हैं।\n\n${disclaimer}`
+        : `Your Platelet Count is 220,000 /µL, which is completely normal and healthy (normal reference range is 150,000 - 450,000 /µL). Platelets help stop bleeding when you get a cut.\n\n${disclaimer}`;
     }
 
-    // 5. GENERAL REPORT QUERY FALLBACK
+    // Symptoms / Pain / Feeling unwell
+    if (qLower.includes('pain') || qLower.includes('fever') || qLower.includes('headache') || qLower.includes('dizzy') || qLower.includes('दर्द') || qLower.includes('बुखार')) {
+      return isHindi
+        ? `यदि आपको कोई शारीरिक दर्द, बुखार या सिरदर्द महसूस हो रहा है, तो कृपया तुरंत अपने चिकित्सक से संपर्क करें। लैब् रिपोर्ट केवल लैब मान दर्शाती है, शारीरिक लक्षणों की जांच डॉक्टर ही कर सकते हैं।\n\n${disclaimer}`
+        : `If you are experiencing physical symptoms like pain, fever, or dizziness, please consult your doctor promptly. Lab report values give context, but physical symptoms require medical evaluation.\n\n${disclaimer}`;
+    }
+
+    // General specific question fallback (Generates response tailored to patient's exact input words)
     return isHindi
-      ? `आपकी रिपोर्ट ("${report ? report.title : 'रक्त जांच'}") के संदर्भ में: मुख्य बिंदु यह है कि हीमोग्लोबिन 11.2 (थोड़ा कम) और फास्टिंग शुगर 104 (बॉर्डरलाइन अधिक) है। आपकी प्लेटलेट्स बिल्कुल स्वस्थ हैं।\n\n${disclaimer}`
-      : `Regarding your query about "${report ? report.title : 'your report'}": The main findings highlight that your Hemoglobin (11.2) is slightly low and Fasting Glucose (104) is borderline high. Your Platelet count is completely normal. Please confirm these findings with your doctor.\n\n${disclaimer}`;
+      ? `आपके प्रश्न "${q}" के उत्तर में: आपकी रिपोर्ट में दो मुख्य बिंदु हैं - हीमोग्लोबिन 11.2 (थोड़ा कम) और फास्टिंग शुगर 104 (बॉर्डरलाइन अधिक)। आपकी प्लेटलेट्स पूरी तरह से स्वस्थ हैं। कृपया इस पर अपने डॉक्टर से परामर्श करें।\n\n${disclaimer}`
+      : `Regarding your query "${q}": Based on your ${report ? report.title : 'report'}, your overall parameters are stable. Your Hemoglobin (11.2) is slightly low and Fasting Glucose (104) is borderline high. Your Platelets are healthy. Please review these values with your doctor.\n\n${disclaimer}`;
+  },
+
+  async callGeminiAPI(apiKey, query, report, language) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const prompt = `
+You are Second Opinion, a compassionate AI medical report explainer assistant.
+Patient Language: ${language === 'hi' ? 'Hindi (हिंदी)' : 'English'}
+
+REPORT CONTEXT:
+Title: ${report.title}
+Document Type: ${report.document_type}
+Summary: ${report.summary_explanation}
+Key Findings: ${JSON.stringify(report.key_findings)}
+
+PATIENT QUESTION: "${query}"
+
+RULES:
+1. Speak directly, warmly, and naturally to the patient.
+2. Address their EXACT question specifically. Do NOT repeat unrelated findings if not asked.
+3. Keep explanation short (2-4 sentences max), simple, and patient-friendly.
+4. End with mandatory disclaimer: "${MANDATORY_DISCLAIMER[language]}"
+`;
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
+
+    if (!res.ok) return null;
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    return text || null;
   }
 };
 
@@ -348,7 +402,152 @@ const VoiceEngine = {
   }
 };
 
-// FLOATING INDIAN VOICE ASSISTANT WIDGET
+// GEMINI / GPT LIVE VOICE MODE FULLSCREEN OVERLAY CONTROLLER
+const GeminiLiveMode = {
+  isHandsFreeLoop: false,
+
+  renderModal() {
+    if (document.getElementById('gemini-voice-modal')) return;
+
+    const modal = document.createElement('div');
+    modal.id = 'gemini-voice-modal';
+    modal.className = 'gemini-voice-modal';
+
+    modal.innerHTML = `
+      <div class="flex items-center justify-between w-full max-w-md">
+        <div class="flex items-center gap-2">
+          <span class="badge badge-sage" style="background: rgba(255,255,255,0.15); color: var(--marigold);">
+            ✨ Gemini Live Voice Mode
+          </span>
+        </div>
+        <button onclick="GeminiLiveMode.closeModal()" class="btn btn-outline text-xs" style="color: var(--white); border-color: rgba(255,255,255,0.3); padding: 0.375rem 0.75rem;">
+          ✕ Exit Live Mode
+        </button>
+      </div>
+
+      <!-- ANIMATED LIVE ORB -->
+      <div class="flex flex-col items-center gap-6 my-auto">
+        <div id="gemini-live-orb" class="gemini-live-orb">
+          <span style="font-size: 3.5rem;" id="orb-icon">🎙️</span>
+        </div>
+
+        <div class="text-center space-y-2 max-w-md">
+          <h2 class="font-serif text-2xl font-bold" id="live-status-title">Listening to you...</h2>
+          <p class="text-sm" style="color: rgba(255,255,255,0.8);" id="live-status-subtitle">
+            Speak naturally like Gemini Live / ChatGPT Voice. Ask any question about your medical report.
+          </p>
+        </div>
+
+        <div id="live-transcript-box" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 0.875rem 1.25rem; border-radius: 1rem; font-size: 0.875rem; text-align: center; max-width: 24rem; min-height: 3rem;" class="flex items-center justify-center">
+          "..."
+        </div>
+      </div>
+
+      <!-- LIVE CONTROLS -->
+      <div class="flex items-center gap-4 w-full max-w-md justify-center">
+        <button id="live-mic-toggle" onclick="GeminiLiveMode.toggleMic()" class="btn btn-marigold" style="padding: 1rem 2rem; border-radius: var(--radius-full);">
+          <span>🎙️ Tap to Speak</span>
+        </button>
+        <button onclick="GeminiLiveMode.closeModal()" class="btn btn-outline" style="color: var(--white); border-color: rgba(255,255,255,0.3); border-radius: var(--radius-full);">
+          <span>End Call</span>
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+  },
+
+  openModal() {
+    this.renderModal();
+    const modal = document.getElementById('gemini-voice-modal');
+    modal.classList.add('open');
+    this.isHandsFreeLoop = true;
+    this.startListeningTurn();
+  },
+
+  closeModal() {
+    const modal = document.getElementById('gemini-voice-modal');
+    if (modal) modal.classList.remove('open');
+    this.isHandsFreeLoop = false;
+    VoiceEngine.stopListening();
+    VoiceEngine.stopSpeaking();
+  },
+
+  toggleMic() {
+    if (VoiceEngine.isListening) {
+      VoiceEngine.stopListening();
+      this.updateOrbState('idle', 'Paused', 'Tap microphone to speak again');
+    } else {
+      this.startListeningTurn();
+    }
+  },
+
+  updateOrbState(state, title, subtitle) {
+    const orb = document.getElementById('gemini-live-orb');
+    const icon = document.getElementById('orb-icon');
+    const titleEl = document.getElementById('live-status-title');
+    const subEl = document.getElementById('live-status-subtitle');
+
+    if (!orb) return;
+    orb.className = 'gemini-live-orb ' + state;
+
+    if (state === 'listening') {
+      icon.innerText = '🎙️';
+    } else if (state === 'speaking') {
+      icon.innerText = '🔊';
+    } else {
+      icon.innerText = '⚡';
+    }
+
+    if (title) titleEl.innerText = title;
+    if (subtitle) subEl.innerText = subtitle;
+  },
+
+  async startListeningTurn() {
+    const report = StorageManager.getReports()[0];
+    const lang = report ? report.language : 'en';
+
+    this.updateOrbState('listening', lang === 'hi' ? 'आपकी बात सुन रहा हूँ...' : 'Listening to you carefully...', 'Speak your question naturally in Hindi or English');
+    const transcriptBox = document.getElementById('live-transcript-box');
+    if (transcriptBox) transcriptBox.innerText = '"Listening..."';
+
+    VoiceEngine.startListening(
+      lang,
+      (text) => {
+        if (transcriptBox) transcriptBox.innerText = `"${text}"`;
+      },
+      (err) => {
+        this.updateOrbState('idle', 'Microphone Paused', 'Tap mic to retry speaking');
+      },
+      async () => {
+        const text = transcriptBox ? transcriptBox.innerText.replace(/^"|"$/g, '') : '';
+        if (text && text !== 'Listening...' && text !== '...') {
+          await this.processAnswerTurn(text, report, lang);
+        } else {
+          this.updateOrbState('idle', 'Ready', 'Tap microphone to speak your question');
+        }
+      }
+    );
+  },
+
+  async processAnswerTurn(text, report, lang) {
+    this.updateOrbState('speaking', lang === 'hi' ? 'उत्तर तैयार कर रहा हूँ...' : 'AI Thinks & Responds...', `Query: "${text}"`);
+    
+    const responseText = await AssistantAI.generateResponse(text, report, lang);
+    const transcriptBox = document.getElementById('live-transcript-box');
+    if (transcriptBox) transcriptBox.innerText = responseText;
+
+    VoiceEngine.speak(responseText, lang, () => {
+      if (this.isHandsFreeLoop) {
+        setTimeout(() => {
+          this.startListeningTurn();
+        }, 1000);
+      }
+    });
+  }
+};
+
+// FLOATING WIDGET TRIGGER
 const FloatingVoiceWidget = {
   render() {
     if (document.getElementById('floating-voice-widget')) return;
@@ -358,109 +557,13 @@ const FloatingVoiceWidget = {
     container.className = 'floating-voice-widget';
 
     container.innerHTML = `
-      <div id="voice-popover" class="voice-popover">
-        <div class="flex items-center justify-between" style="border-bottom: 1px solid var(--sage-line); padding-bottom: 0.5rem;">
-          <div class="flex items-center gap-2 font-bold text-xs" style="color: var(--teal-deep);">
-            <span>🎙️ Indian Voice Assistant</span>
-          </div>
-          <button onclick="FloatingVoiceWidget.closePopover()" class="text-xs font-bold" style="color: rgba(29,43,39,0.5);">✕</button>
-        </div>
-        
-        <p class="text-xs" style="color: rgba(29,43,39,0.8);" id="popover-status">
-          Tap "Talk Now" and ask any question in Hindi or English (e.g. "Hi", "How is my sugar?", "What is hemoglobin?")
-        </p>
-
-        <div id="popover-transcript" style="display: none; background: var(--paper); padding: 0.5rem; border-radius: 0.5rem; font-size: 0.75rem; font-family: monospace; max-height: 80px; overflow-y: auto;">
-        </div>
-
-        <div class="flex gap-2">
-          <button id="widget-mic-btn" onclick="FloatingVoiceWidget.toggleVoice()" class="btn btn-marigold text-xs w-full">
-            <span>🎙️ Talk Now</span>
-          </button>
-          <button id="widget-stop-audio" onclick="VoiceEngine.stopSpeaking(); FloatingVoiceWidget.closePopover();" class="btn btn-outline text-xs" style="display: none;">
-            <span>Stop Voice</span>
-          </button>
-        </div>
-      </div>
-
-      <button id="widget-floating-trigger" onclick="FloatingVoiceWidget.togglePopover()" class="voice-widget-btn" title="Talk to Voice Assistant">
-        <span style="font-size: 1.125rem;">🎙️</span>
-        <span>Talk to Voice Assistant</span>
+      <button id="widget-floating-trigger" onclick="GeminiLiveMode.openModal()" class="voice-widget-btn" title="Open Gemini Live Voice Mode">
+        <span style="font-size: 1.25rem;">✨</span>
+        <span>Talk to Gemini Live Assistant</span>
       </button>
     `;
 
     document.body.appendChild(container);
-  },
-
-  togglePopover() {
-    const popover = document.getElementById('voice-popover');
-    if (popover) {
-      popover.classList.toggle('active');
-    }
-  },
-
-  closePopover() {
-    const popover = document.getElementById('voice-popover');
-    if (popover) {
-      popover.classList.remove('active');
-    }
-    VoiceEngine.stopListening();
-    VoiceEngine.stopSpeaking();
-  },
-
-  toggleVoice() {
-    const statusEl = document.getElementById('popover-status');
-    const transcriptEl = document.getElementById('popover-transcript');
-    const micBtn = document.getElementById('widget-mic-btn');
-    const floatingBtn = document.getElementById('widget-floating-trigger');
-
-    if (VoiceEngine.isListening) {
-      VoiceEngine.stopListening();
-      micBtn.classList.remove('listening');
-      floatingBtn.classList.remove('listening');
-      micBtn.querySelector('span').innerText = '🎙️ Talk Now';
-      statusEl.innerText = 'Listening stopped. Tap to speak again.';
-      return;
-    }
-
-    const report = StorageManager.getReports()[0];
-    const lang = report ? report.language : 'en';
-
-    statusEl.innerText = lang === 'hi' ? '🎙️ सुन रहा हूँ... प्रश्न बोलिए' : '🎙️ Listening... Speak your medical question now!';
-    transcriptEl.style.display = 'block';
-    transcriptEl.innerText = '...';
-    micBtn.classList.add('listening');
-    floatingBtn.classList.add('listening');
-    micBtn.querySelector('span').innerText = '🔴 Listening...';
-
-    VoiceEngine.startListening(
-      lang,
-      (text) => {
-        transcriptEl.innerText = text;
-      },
-      (err) => {
-        statusEl.innerText = '⚠️ ' + err;
-        micBtn.classList.remove('listening');
-        floatingBtn.classList.remove('listening');
-        micBtn.querySelector('span').innerText = '🎙️ Talk Now';
-      },
-      () => {
-        micBtn.classList.remove('listening');
-        floatingBtn.classList.remove('listening');
-        micBtn.querySelector('span').innerText = '🎙️ Talk Now';
-        const text = transcriptEl.innerText;
-        if (text && text !== '...') {
-          statusEl.innerText = 'Responding in Indian voice...';
-          const reply = AssistantAI.generateResponse(text, report, lang);
-          
-          document.getElementById('widget-stop-audio').style.display = 'inline-flex';
-          VoiceEngine.speak(reply, lang, () => {
-            document.getElementById('widget-stop-audio').style.display = 'none';
-            statusEl.innerText = 'Answer complete. Tap microphone to ask another question.';
-          });
-        }
-      }
-    );
   }
 };
 

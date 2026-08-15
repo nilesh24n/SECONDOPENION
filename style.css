@@ -183,7 +183,7 @@ main.main-content {
   color: rgba(29, 43, 39, 0.7);
 }
 
-/* FLOATING ALWAYS-VISIBLE INDIAN VOICE ASSISTANT WIDGET */
+/* GEMINI / GPT LIVE VOICE MODE FLOATING WIDGET & FULLSCREEN MODAL */
 .floating-voice-widget {
   position: fixed;
   bottom: 1.25rem;
@@ -196,8 +196,8 @@ main.main-content {
 }
 
 .voice-widget-btn {
-  background: linear-gradient(135deg, var(--marigold), var(--marigold-deep));
-  color: var(--teal-deep);
+  background: linear-gradient(135deg, var(--teal-deep), var(--teal));
+  color: var(--white);
   padding: 0.875rem 1.25rem;
   border-radius: var(--radius-full);
   font-weight: 700;
@@ -205,37 +205,90 @@ main.main-content {
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  box-shadow: 0 10px 25px rgba(232, 163, 61, 0.4);
+  box-shadow: 0 10px 25px rgba(14, 46, 41, 0.3);
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border: 2px solid var(--white);
+  border: 2px solid var(--marigold);
 }
 
 .voice-widget-btn:hover {
   transform: translateY(-3px) scale(1.03);
 }
 
-.voice-widget-btn.listening {
-  background: linear-gradient(135deg, #EF4444, #B91C1C);
-  color: var(--white);
-  animation: pulse-ring 1.5s infinite;
+.voice-widget-btn.active-live {
+  background: linear-gradient(135deg, #10B981, #047857);
+  border-color: #A7F3D0;
+  animation: pulse-ring-live 1.8s infinite;
 }
 
-.voice-popover {
+/* GEMINI LIVE VOICE MODAL OVERLAY */
+.gemini-voice-modal {
   display: none;
-  background: var(--white);
-  border: 1px solid var(--sage-line);
-  border-radius: var(--radius-xl);
-  padding: 1.25rem;
-  width: 20rem;
-  max-width: calc(100vw - 2.5rem);
-  box-shadow: var(--shadow-lg);
+  position: fixed;
+  inset: 0;
+  background-color: rgba(14, 46, 41, 0.92);
+  backdrop-filter: blur(16px);
+  z-index: 200;
+  color: var(--white);
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2.5rem 1.5rem;
 }
 
-.voice-popover.active {
+.gemini-voice-modal.open {
   display: flex;
+}
+
+.gemini-live-orb {
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--marigold) 0%, var(--marigold-deep) 60%, var(--teal) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 50px rgba(232, 163, 61, 0.6);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.gemini-live-orb.listening {
+  animation: orb-pulse-listen 1.2s infinite ease-in-out;
+  background: radial-gradient(circle, #EF4444 0%, #B91C1C 60%, var(--teal-deep) 100%);
+  box-shadow: 0 0 60px rgba(239, 68, 68, 0.8);
+}
+
+.gemini-live-orb.speaking {
+  animation: orb-pulse-speak 0.8s infinite ease-in-out;
+  background: radial-gradient(circle, #34D399 0%, #059669 60%, var(--teal) 100%);
+  box-shadow: 0 0 60px rgba(52, 211, 153, 0.8);
+}
+
+@keyframes orb-pulse-listen {
+  0% { transform: scale(0.95); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(0.95); }
+}
+
+@keyframes orb-pulse-speak {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulse-ring-live {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 14px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 /* VISUAL HEALTH RANGE SPECTRUM GAUGES */
@@ -408,22 +461,6 @@ main.main-content {
   .card {
     padding: 1.125rem;
     border-radius: 1.125rem;
-  }
-}
-
-/* ANIMATIONS */
-@keyframes pulse-ring {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 14px rgba(239, 68, 68, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
   }
 }
 
