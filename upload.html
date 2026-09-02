@@ -23,6 +23,10 @@
           <span>📜</span>
           <span>Report History</span>
         </a>
+        <a href="settings.html" class="nav-link">
+          <span>⚙️</span>
+          <span>Settings</span>
+        </a>
         <div id="nav-user-container"></div>
       </div>
       <button class="mobile-menu-btn" onclick="toggleMobileDrawer()">☰</button>
@@ -48,6 +52,23 @@
         </h1>
         <p class="text-sm" style="color: rgba(29,43,39,0.7); max-width: 32rem; margin: 0 auto;">
           Upload a clear photo or PDF of your blood test, prescription, scan summary, or lab report.
+        </p>
+      </div>
+
+      <!-- FREE OCR INFO -->
+      <div class="card" style="background: var(--sage); border-color: var(--sage-line);">
+        <p class="text-sm" style="color: var(--teal-deep);">
+          <strong>✅ No API key needed for photos:</strong> Upload a JPG/PNG image and we scan it with free browser OCR automatically.
+          For PDFs or smarter AI, add a free Gemini key in <a href="settings.html" style="font-weight: 700;">Settings</a>.
+        </p>
+      </div>
+
+      <!-- AI KEY BANNER (optional upgrade) -->
+      <div id="api-key-banner" class="card" style="display: none; background: var(--amber-bg); border-color: var(--amber-border);">
+        <p class="text-sm" style="color: var(--amber-text);">
+          <strong>💡 Even smarter analysis:</strong> Add a free Gemini API key in
+          <a href="settings.html" style="color: var(--teal-deep); font-weight: 700;">Settings</a>
+          for PDF support and more accurate AI reading.
         </p>
       </div>
 
@@ -136,7 +157,7 @@
 
         <div style="background: var(--paper); padding: 0.875rem; border-radius: 0.75rem; border: 1px solid var(--sage-line); display: flex; items-center; gap: 0.625rem; font-size: 0.75rem; color: rgba(29,43,39,0.8);">
           <span>✅</span>
-          <span>Your document is analyzed securely. Non-medical documents (like timetables or bills) will be flagged.</span>
+          <span>Photos are scanned free with browser OCR. Gemini key adds PDF support and smarter AI.</span>
         </div>
 
       </div>
@@ -148,6 +169,27 @@
   <script>
     let selectedLanguage = 'en';
     let uploadedFile = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!StorageManager.getGeminiKey()) {
+        document.getElementById('api-key-banner').style.display = 'block';
+      }
+      setupDragDrop();
+    });
+
+    function setupDragDrop() {
+      const zone = document.getElementById('drop-zone');
+      ['dragenter', 'dragover'].forEach(evt => {
+        zone.addEventListener(evt, (e) => { e.preventDefault(); zone.style.borderColor = 'var(--teal)'; });
+      });
+      ['dragleave', 'drop'].forEach(evt => {
+        zone.addEventListener(evt, (e) => { e.preventDefault(); zone.style.borderColor = ''; });
+      });
+      zone.addEventListener('drop', (e) => {
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileSelected(file);
+      });
+    }
 
     function selectLang(lang) {
       selectedLanguage = lang;
@@ -201,24 +243,35 @@
       `;
     }
 
-    function submitUpload() {
+    async function submitUpload() {
       if (!uploadedFile) {
         const errorEl = document.getElementById('upload-error');
-        if (errorEl.style.display !== 'none' && errorEl.innerText) {
-          return;
-        }
+        if (errorEl.style.display !== 'none' && errorEl.innerText) return;
         generateInstantDemo(selectedLanguage);
         return;
       }
 
       const btn = document.getElementById('submit-btn');
       const text = document.getElementById('submit-text');
+      const errorEl = document.getElementById('upload-error');
       btn.disabled = true;
-      text.innerText = selectedLanguage === 'hi' ? 'रिपोर्ट की व्याख्या की जा रही है...' : 'Translating jargon into plain language...';
+      errorEl.style.display = 'none';
 
-      setTimeout(() => {
-        generateInstantDemo(selectedLanguage);
-      }, 1200);
+      const isImage = uploadedFile.type.startsWith('image/') || /\.(jpg|jpeg|png|webp)$/i.test(uploadedFile.name);
+      text.innerText = StorageManager.getGeminiKey()
+        ? (selectedLanguage === 'hi' ? 'AI रिपोर्ट पढ़ रहा है...' : 'AI is reading your report...')
+        : isImage
+          ? (selectedLanguage === 'hi' ? 'मुफ़्त OCR स्कैन हो रहा है...' : 'Free OCR scanning your photo...')
+          : (selectedLanguage === 'hi' ? 'डेमो रिपोर्ट लोड हो रही है...' : 'Loading sample report...');
+
+      try {
+        await processUploadedFile(uploadedFile, selectedLanguage, (msg) => { text.innerText = msg; });
+      } catch (err) {
+        console.error('Upload error:', err);
+        errorEl.innerHTML = `<strong>⚠️ Analysis failed:</strong> ${err.message || 'Unknown error'}. Loading sample report instead...`;
+        errorEl.style.display = 'block';
+        setTimeout(() => generateInstantDemo(selectedLanguage, uploadedFile.name), 1500);
+      }
     }
   </script>
 </body>

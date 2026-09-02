@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI & Voice Settings — Second Opinion</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="navbar-container">
+      <a href="index.html" class="brand-logo">Second<span>Opinion</span></a>
+      <div class="nav-links desktop-only">
+        <a href="upload.html" class="nav-link"><span>📤</span><span>Upload Report</span></a>
+        <a href="history.html" class="nav-link"><span>📜</span><span>Report History</span></a>
+        <a href="settings.html" class="nav-link" style="color: var(--teal-deep); font-weight: 700;"><span>⚙️</span><span>Settings</span></a>
+        <div id="nav-user-container"></div>
+      </div>
+      <button class="mobile-menu-btn" onclick="toggleMobileDrawer()">☰</button>
+    </div>
+  </header>
+
+  <div id="mobile-drawer" class="mobile-drawer">
+    <div id="mobile-drawer-links"></div>
+  </div>
+
+  <main class="main-content">
+    <div class="max-w-2xl mx-auto space-y-6">
+
+      <div class="text-center space-y-2">
+        <div class="badge badge-sage"><span>⚙️ Free AI Setup</span></div>
+        <h1 class="font-serif text-2xl sm:text-3xl font-bold" style="color: var(--teal-deep);">AI & Voice Settings</h1>
+        <p class="text-sm" style="color: rgba(29,43,39,0.7);">
+          Add a <strong>100% free</strong> API key for smarter answers. Without a key, the built-in local assistant still works.
+        </p>
+      </div>
+
+      <!-- PROVIDER SELECT -->
+      <div class="card space-y-4">
+        <label class="form-label">Preferred AI Provider</label>
+        <select id="ai-provider" class="form-input" onchange="saveSettings()">
+          <option value="auto">Auto (try Groq, then Gemini, then local)</option>
+          <option value="groq">Groq only (free Llama 3.1)</option>
+          <option value="gemini">Google Gemini only (free tier)</option>
+          <option value="local">Local assistant only (no API)</option>
+        </select>
+      </div>
+
+      <!-- GROQ -->
+      <div class="card space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="font-serif text-lg font-bold" style="color: var(--teal-deep);">Groq — Free & Fast</h2>
+          <span class="badge badge-sage">Recommended</span>
+        </div>
+        <p class="text-xs" style="color: rgba(29,43,39,0.7);">
+          1. Go to <a href="https://console.groq.com/keys" target="_blank" rel="noopener" style="color: var(--teal); font-weight: 600;">console.groq.com/keys</a><br>
+          2. Sign up free (no credit card needed)<br>
+          3. Create an API key and paste below
+        </p>
+        <input type="password" id="groq-key" class="form-input" placeholder="gsk_..." autocomplete="off" />
+        <div class="flex gap-2">
+          <button onclick="testGroq()" class="btn btn-sage text-xs">Test Groq Key</button>
+          <button onclick="clearGroq()" class="btn btn-outline text-xs">Clear</button>
+        </div>
+        <p id="groq-status" class="text-xs" style="display:none;"></p>
+      </div>
+
+      <!-- GEMINI -->
+      <div class="card space-y-4">
+        <h2 class="font-serif text-lg font-bold" style="color: var(--teal-deep);">Google Gemini — Free Tier</h2>
+        <p class="text-xs" style="color: rgba(29,43,39,0.7);">
+          1. Go to <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color: var(--teal); font-weight: 600;">aistudio.google.com/apikey</a><br>
+          2. Sign in with Google and create a free API key<br>
+          3. Paste below
+        </p>
+        <input type="password" id="gemini-key" class="form-input" placeholder="AIza..." autocomplete="off" />
+        <div class="flex gap-2">
+          <button onclick="testGemini()" class="btn btn-sage text-xs">Test Gemini Key</button>
+          <button onclick="clearGemini()" class="btn btn-outline text-xs">Clear</button>
+        </div>
+        <p id="gemini-status" class="text-xs" style="display:none;"></p>
+      </div>
+
+      <!-- VOICE -->
+      <div class="card space-y-4">
+        <h2 class="font-serif text-lg font-bold" style="color: var(--teal-deep);">Voice Speed</h2>
+        <label class="text-xs">Speech rate: <span id="rate-label">0.92</span></label>
+        <input type="range" id="speech-rate" min="0.7" max="1.2" step="0.05" value="0.92" class="w-full" oninput="updateSpeechRate(this.value)" />
+        <p class="text-xs" style="color: rgba(29,43,39,0.6);">
+          Microphone works on Chrome/Edge/Safari over HTTPS or localhost. Indian voices depend on your device.
+        </p>
+      </div>
+
+      <div id="save-toast" class="card text-center text-xs" style="display:none; background: var(--sage); color: var(--teal-deep); font-weight: 600;">
+        Settings saved!
+      </div>
+
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('groq-key').value = StorageManager.getGroqKey();
+      document.getElementById('gemini-key').value = StorageManager.getGeminiKey();
+      document.getElementById('ai-provider').value = StorageManager.getAIProvider();
+      document.getElementById('speech-rate').value = VoiceEngine.speechRate;
+      document.getElementById('rate-label').innerText = VoiceEngine.speechRate;
+    });
+
+    function saveSettings() {
+      StorageManager.setGroqKey(document.getElementById('groq-key').value.trim());
+      StorageManager.setGeminiKey(document.getElementById('gemini-key').value.trim());
+      StorageManager.setAIProvider(document.getElementById('ai-provider').value);
+      const toast = document.getElementById('save-toast');
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    function updateSpeechRate(val) {
+      VoiceEngine.speechRate = parseFloat(val);
+      document.getElementById('rate-label').innerText = val;
+      localStorage.setItem('second_opinion_speech_rate', val);
+    }
+
+    const savedRate = localStorage.getItem('second_opinion_speech_rate');
+    if (savedRate) VoiceEngine.speechRate = parseFloat(savedRate);
+
+    function clearGroq() {
+      document.getElementById('groq-key').value = '';
+      StorageManager.setGroqKey('');
+      saveSettings();
+    }
+
+    function clearGemini() {
+      document.getElementById('gemini-key').value = '';
+      StorageManager.setGeminiKey('');
+      saveSettings();
+    }
+
+    function showStatus(id, msg, ok) {
+      const el = document.getElementById(id);
+      el.style.display = 'block';
+      el.style.color = ok ? 'var(--teal-deep)' : 'var(--red-text)';
+      el.innerText = msg;
+    }
+
+    async function testGroq() {
+      saveSettings();
+      const key = StorageManager.getGroqKey();
+      if (!key) return showStatus('groq-status', 'Enter a Groq API key first.', false);
+      showStatus('groq-status', 'Testing...', true);
+      try {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model: 'llama-3.1-8b-instant',
+            messages: [{ role: 'user', content: 'Reply with exactly: Groq works!' }],
+            max_tokens: 20
+          })
+        });
+        if (res.ok) showStatus('groq-status', '✅ Groq key works! Smarter AI answers enabled.', true);
+        else showStatus('groq-status', '❌ Invalid key or rate limit. Check console.groq.com', false);
+      } catch (e) {
+        showStatus('groq-status', '❌ Network error. Check your connection.', false);
+      }
+    }
+
+    async function testGemini() {
+      saveSettings();
+      const key = StorageManager.getGeminiKey();
+      if (!key) return showStatus('gemini-status', 'Enter a Gemini API key first.', false);
+      showStatus('gemini-status', 'Testing...', true);
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: 'Reply with exactly: Gemini works!' }] }] })
+        });
+        if (res.ok) showStatus('gemini-status', '✅ Gemini key works! Smarter AI answers enabled.', true);
+        else showStatus('gemini-status', '❌ Invalid key. Check aistudio.google.com/apikey', false);
+      } catch (e) {
+        showStatus('gemini-status', '❌ Network error. Check your connection.', false);
+      }
+    }
+
+    document.getElementById('groq-key').addEventListener('change', saveSettings);
+    document.getElementById('gemini-key').addEventListener('change', saveSettings);
+  </script>
+</body>
+</html>

@@ -24,6 +24,10 @@
           <span>📜</span>
           <span>Report History</span>
         </a>
+        <a href="settings.html" class="nav-link">
+          <span>⚙️</span>
+          <span>Settings</span>
+        </a>
         <div id="nav-user-container"></div>
       </div>
       <button class="mobile-menu-btn" onclick="toggleMobileDrawer()">☰</button>
@@ -91,18 +95,18 @@
           </div>
 
           <div style="font-family: monospace; font-size: 0.75rem; background: var(--paper); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid var(--sage-line); display: flex; justify-content: space-between;">
-            <span>HbA1c: 6.1%</span>
-            <span style="color: var(--marigold-deep); font-weight: 700;">Ref: &lt;5.7%</span>
+            <span id="demo-lab-value">Hemoglobin: 11.2 g/dL</span>
+            <span style="color: var(--marigold-deep); font-weight: 700;" id="demo-lab-ref">Ref: 12.0–15.5</span>
           </div>
 
           <div style="text-align: center; color: var(--marigold-deep); font-weight: 700;">↓</div>
 
           <div id="demo-explanation-box" style="background: var(--sage); padding: 1rem; border-radius: 0.75rem; font-size: 0.875rem; border: 1px solid var(--sage-line); display: flex; flex-direction: column; gap: 0.5rem;">
             <p style="font-weight: 700; color: var(--teal);">
-              Your average blood sugar over the last 3 months is slightly above normal.
+              Your hemoglobin is slightly below the normal range — this can sometimes cause mild tiredness.
             </p>
             <p style="font-size: 0.75rem; color: rgba(29,43,39,0.8);">
-              This isn't diabetes yet, but it's a stage doctors call "prediabetes." Worth discussing with your doctor at your next visit.
+              It's not severe anemia, but worth asking your doctor about iron-rich foods or a supplement at your next visit.
             </p>
           </div>
 
@@ -158,6 +162,7 @@
         </h3>
         <p class="text-sm" style="color: rgba(29,43,39,0.8);">
           Don't want to type? Tap the floating voice button at the bottom right anytime to ask questions about your report in Hindi or English.
+          <a href="settings.html" style="color: var(--teal); font-weight: 600;">Add a free AI key in Settings</a> for smarter spoken answers.
         </p>
       </div>
     </section>
@@ -227,22 +232,26 @@
       const disclaimer = document.getElementById('demo-disclaimer');
 
       if (lang === 'hi') {
+        document.getElementById('demo-lab-value').innerText = 'हीमोग्लोबिन: 11.2 g/dL';
+        document.getElementById('demo-lab-ref').innerText = 'सामान्य: 12.0–15.5';
         box.innerHTML = `
           <p style="font-weight: 700; color: var(--teal);">
-            पिछले 3 महीनों में आपका औसत ब्लड शुगर सामान्य सीमा से थोड़ा अधिक है।
+            आपका हीमोग्लोबिन सामान्य सीमा से थोड़ा कम है — इससे हल्की थकान हो सकती है।
           </p>
           <p style="font-size: 0.75rem; color: rgba(29,43,39,0.8);">
-            यह अभी मधुमेह (डायबिटीज) नहीं है, लेकिन इसे डॉक्टर "प्रीडायबिटीज" कहते हैं। अगली यात्रा पर अपने डॉक्टर से इस पर चर्चा करना उचित है।
+            यह गंभीर एनीमिया नहीं है, लेकिन अगली यात्रा पर डॉक्टर से आयरन युक्त आहार या सप्लीमेंट के बारे में पूछना उचित है।
           </p>
         `;
         disclaimer.innerText = 'यह एक व्याख्या है, निदान नहीं। हमेशा अपने डॉक्टर से पुष्टि करें।';
       } else {
+        document.getElementById('demo-lab-value').innerText = 'Hemoglobin: 11.2 g/dL';
+        document.getElementById('demo-lab-ref').innerText = 'Ref: 12.0–15.5';
         box.innerHTML = `
           <p style="font-weight: 700; color: var(--teal);">
-            Your average blood sugar over the last 3 months is slightly above normal.
+            Your hemoglobin is slightly below the normal range — this can sometimes cause mild tiredness.
           </p>
           <p style="font-size: 0.75rem; color: rgba(29,43,39,0.8);">
-            This isn't diabetes yet, but it's a stage doctors call "prediabetes." Worth discussing with your doctor at your next visit.
+            It's not severe anemia, but worth asking your doctor about iron-rich foods or a supplement at your next visit.
           </p>
         `;
         disclaimer.innerText = 'This is an explanation, not a diagnosis. Always confirm with your doctor.';

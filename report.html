@@ -23,9 +23,13 @@
           <span>📜</span>
           <span>Report History</span>
         </a>
+        <a href="settings.html" class="nav-link">
+          <span>⚙️</span>
+          <span>Settings</span>
+        </a>
         <div id="nav-user-container"></div>
       </div>
-      <button class="mobile-menu-btn" onclick="toggleMobileDrawer()">☰</button>
+      <button class="mobile-menu-btn" onclick="toggleMobileDrawer()">☰</button>    
     </div>
   </header>
 
@@ -115,6 +119,9 @@
             <button id="global-stop-audio" onclick="stopAllAudio()" class="badge badge-sage" style="display: none; background: var(--marigold); color: var(--teal-deep); cursor: pointer;">
               <span>Stop Voice</span>
             </button>
+            <button onclick="clearChatHistory()" class="badge badge-sage text-xs" style="cursor: pointer;" title="Clear chat history">
+              <span>🗑️ Clear Chat</span>
+            </button>
           </div>
 
           <div class="chat-messages" id="chat-messages-list">
@@ -168,6 +175,7 @@
 
       renderReportPage();
       renderChatMessages();
+      GeminiLiveMode.setActiveReport(currentReport.id);
     });
 
     function renderReportPage() {
@@ -313,7 +321,7 @@
       VoiceEngine.speak(msg.content, currentReport.language, () => {
         activeMsgAudioId = null;
         document.getElementById('global-stop-audio').style.display = 'none';
-      });
+      }, { short: false, autoLang: true });
     }
 
     function renderChatMessages() {
@@ -359,7 +367,7 @@
         .replace(/\n/g, '<br/>');
     }
 
-    function handleSendChat(e) {
+    async function handleSendChat(e) {
       if (e) e.preventDefault();
       const input = document.getElementById('chat-input');
       const text = input.value.trim();
@@ -375,11 +383,10 @@
       StorageManager.saveChatMessage(userMsg);
       input.value = '';
       renderChatMessages();
+      showChatLoading(true);
 
-      // Intelligent Natural Conversational Response
-      setTimeout(() => {
-        const answer = AssistantAI.generateResponse(text, currentReport, currentReport.language);
-
+      try {
+        const answer = await AssistantAI.generateResponse(text, currentReport, currentReport.language);
         const assistantMsg = {
           id: 'msg_a_' + Date.now(),
           report_id: currentReport.id,
@@ -390,7 +397,28 @@
         StorageManager.saveChatMessage(assistantMsg);
         renderChatMessages();
         playMessageAudio(assistantMsg.id);
-      }, 400);
+      } catch (err) {
+        console.error('Chat error:', err);
+      } finally {
+        showChatLoading(false);
+      }
+    }
+
+    function showChatLoading(show) {
+      const list = document.getElementById('chat-messages-list');
+      let loader = document.getElementById('chat-loading');
+      if (show) {
+        if (!loader) {
+          loader = document.createElement('div');
+          loader.id = 'chat-loading';
+          loader.className = 'chat-bubble chat-bubble-assistant';
+          loader.innerHTML = '<span style="opacity:0.7;">Thinking...</span>';
+          list.appendChild(loader);
+        }
+        list.scrollTop = list.scrollHeight;
+      } else if (loader) {
+        loader.remove();
+      }
     }
 
     function sendQuickQuestion(q) {
@@ -402,6 +430,7 @@
       if (VoiceEngine.isListening) {
         stopMicListening();
       } else {
+        if (VoiceEngine.isSpeaking) VoiceEngine.stopSpeaking();
         const started = VoiceEngine.startListening(
           currentReport.language,
           (transcript) => {
@@ -410,14 +439,18 @@
           (err) => {
             document.getElementById('mic-status-text').innerText = '⚠️ ' + err;
           },
-          () => {
+          (finalText) => {
             stopMicListening();
+            if (finalText && finalText.trim().length > 2) {
+              document.getElementById('chat-input').value = finalText.trim();
+              handleSendChat();
+            }
           }
         );
 
         if (started) {
           document.getElementById('mic-status-bar').style.display = 'flex';
-          document.getElementById('mic-status-text').innerText = '🎙️ Listening... Speak your medical question now';
+          document.getElementById('mic-status-text').innerText = '🎙️ Listening... speak your question, then pause';
           document.getElementById('mic-icon').innerText = '🔴';
         }
       }
@@ -434,6 +467,12 @@
         StorageManager.deleteReport(currentReport.id);
         window.location.href = 'history.html';
       }
+    }
+
+    function clearChatHistory() {
+      if (!confirm('Clear all chat messages for this report?')) return;
+      StorageManager.clearChat(currentReport.id);
+      renderChatMessages();
     }
   </script>
 </body>
